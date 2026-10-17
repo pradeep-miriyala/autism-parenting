@@ -5,24 +5,17 @@ import { useEffect, useState } from 'react'
 import { PARENT_PAGES } from '../nav'
 import { summarise } from '../progress'
 import { useApp } from '../store'
-import { ChevronIcon, ChartIcon, GearIcon, MicIcon, PictureIcon, ShieldIcon, UserIcon } from '../icons'
+import { ChevronIcon, ChartIcon, GearIcon, MicIcon, PictureIcon, ShareIcon, ShieldIcon, UserIcon } from '../icons'
 
 const PORTFOLIO = process.env.NEXT_PUBLIC_PORTFOLIO_URL || 'https://pradeep.miriyala.in'
 const ICONS: Record<string, React.ReactNode> = {
-  child: <UserIcon />, progress: <ChartIcon />, settings: <GearIcon />, voice: <MicIcon />, pictures: <PictureIcon />, privacy: <ShieldIcon />,
+  child: <UserIcon />, progress: <ChartIcon />, settings: <GearIcon />, voice: <MicIcon />, pictures: <PictureIcon />, share: <ShareIcon />, privacy: <ShieldIcon />,
 }
 
 export default function ParentHub() {
   const { profile, progress, sound, useRecordings, shareCounts } = useApp()
   const [week, setWeek] = useState<number | null>(null)
   useEffect(() => { setWeek(summarise(progress, new Date()).week) }, [progress])
-  const share = async () => {
-    const url = location.origin
-    try {
-      if (navigator.share) await navigator.share({ title: 'Little Steps', text: 'Calm practice games for autistic children.', url })
-      else { await navigator.clipboard.writeText(url) }
-    } catch {}
-  }
   const line: Record<string, string> = {
     child: profile.name.trim() ? `${profile.name.trim()}${profile.age ? `, ${profile.age}` : ''}` : 'Not set',
     progress: week === null ? '' : week === 0 ? 'No rounds in the last 7 days' : `${week} ${week === 1 ? 'round' : 'rounds'} in the last 7 days`,
@@ -56,7 +49,7 @@ export default function ParentHub() {
       <h2 className="sq-subhead">About the project</h2>
       <p className="sq-note">Little Steps is free, made by Pradeep Miriyala. It is not medical advice.</p>
       <p className="ls-links">
-        <button type="button" className="sq-btn" onClick={share}>Share Little Steps</button>
+        <Link href="/parents/share" className="sq-btn">Share Little Steps</Link>
         <Link href="/about" className="sq-btn">About</Link>
         <a href={PORTFOLIO} className="sq-btn" target="_blank" rel="noreferrer">Pradeep Miriyala ↗</a>
         <a href={`${PORTFOLIO}/contact`} className="sq-btn" target="_blank" rel="noreferrer">Get in touch ↗</a>

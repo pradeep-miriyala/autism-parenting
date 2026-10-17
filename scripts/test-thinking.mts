@@ -8,7 +8,7 @@
 import { readFileSync } from 'node:fs'
 import {
   CATEGORIES, COUNT_QUESTIONS, DESIGNS, DOTS_RANGE, ODD_QUESTIONS, PATTERN_QUESTIONS, SHAPES, SHAPE_COLOURS, SORT_LEVELS, THINGS, UNITS,
-  countLayout, countMax, crosses, dotsFor, makeCountRound, makeDotsRound, makeOddRound, makePatternRound, makePuzzle, makePuzzleScene, makeSortRound, oddCount, pieceBox,
+  countLayout, countMax, crosses, DOT_REACH_MAX, dotAt, dotReach, dotsFor, makeCountRound, makeDotsRound, makeOddRound, makePatternRound, makePuzzle, makePuzzleScene, makeSortRound, oddCount, pieceBox,
 } from '../src/games/thinking/rounds.ts'
 import { COLOURS, seeded } from '../src/games/spot/generate.ts'
 
@@ -163,12 +163,24 @@ for (let level = 1; level <= 3; level++) {
     let nearest = Infinity
     for (let i = 0; i < r.dots.length; i++) for (let j = i + 1; j < r.dots.length; j++) nearest = Math.min(nearest, Math.hypot(r.dots[i].x - r.dots[j].x, r.dots[i].y - r.dots[j].y))
     check(nearest >= 28, `${tag}: two dots only ${nearest.toFixed(0)} apart`)
+    // Drawing: a finger is "on" a dot within its reach. The reach is big enough to hit, and never shared by two dots.
+    const reach = dotReach(r.dots)
+    check(reach >= 13 && reach <= DOT_REACH_MAX && reach * 2 < nearest, `${tag}: reach ${reach.toFixed(1)} with dots ${nearest.toFixed(0)} apart`)
+    r.dots.forEach((d, i) => {
+      check(dotAt(r.dots, d, reach) === i, `${tag}: dot ${i} is found at its own centre`)
+      check(dotAt(r.dots, { x: d.x + reach * 0.9, y: d.y }, reach) === i || nearest < reach * 1.9, `${tag}: dot ${i} is found just inside its edge`)
+      const next = r.dots[(i + 1) % r.dots.length]
+      check(dotAt(r.dots, { x: (d.x + next.x) / 2, y: (d.y + next.y) / 2 }, reach) === -1, `${tag}: halfway between dots is on neither`)
+    })
+    check(dotAt(r.dots, { x: -50, y: -50 }, reach) === -1, `${tag}: far from every dot`)
     for (let i = 0; i < r.dots.length; i++) for (let j = i + 1; j < r.dots.length; j++) {
       if (Math.abs(i - j) === 1 || (i === 0 && j === r.dots.length - 1)) continue
       check(!crosses(r.dots[i], r.dots[(i + 1) % r.dots.length], r.dots[j], r.dots[(j + 1) % r.dots.length]), `${tag}: crossing lines`)
     }
   }
 }
+check(dotReach([{ x: 0, y: 0 }, { x: 300, y: 0 }]) === DOT_REACH_MAX && dotReach([{ x: 0, y: 0 }, { x: 50, y: 0 }]) === 24, 'the reach is capped, and shrinks for close dots')
+check(dotAt([{ x: 0, y: 0 }, { x: 40, y: 0 }], { x: 22, y: 0 }, 30) === 1, 'the nearer of two dots is chosen')
 check(dotsFor(DESIGNS[0], 4).length === 4 && dotsFor(DESIGNS[0], 9).length === 9, 'dotsFor gives the number asked for')
 
 if (failed) { console.error(`${failed} check(s) failed`); process.exit(1) }

@@ -377,6 +377,24 @@ export function makeDotsRound(level: number, rand: () => number = Math.random, a
   return { design, dots: dotsFor(design, Math.min(want, hi)) }
 }
 
+/**
+ * How close a finger has to be to count as "on" a dot: nearly the size of a fingertip, but never so big that two
+ * neighbouring dots share a place. Drawing the line and tapping both use it.
+ */
+export const DOT_REACH_MAX = 32
+export function dotReach(dots: P[]): number {
+  let gap = Infinity
+  for (let i = 0; i < dots.length; i++) for (let j = i + 1; j < dots.length; j++) gap = Math.min(gap, dist(dots[i], dots[j]))
+  return Math.min(DOT_REACH_MAX, gap * 0.48)
+}
+
+/** The dot a point is on (the nearest within `reach`), or -1. */
+export function dotAt(dots: P[], p: P, reach: number): number {
+  let best = -1, bestD = reach
+  dots.forEach((d, i) => { const k = dist(d, p); if (k <= bestD) { best = i; bestD = k } })
+  return best
+}
+
 /** Do two segments cross (not just meet at an end)? For checking that an outline does not cross itself. */
 export function crosses(a: P, b: P, c: P, d: P): boolean {
   const o = (p: P, q: P, r: P) => Math.sign((q.x - p.x) * (r.y - p.y) - (q.y - p.y) * (r.x - p.x))

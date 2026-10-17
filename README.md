@@ -56,7 +56,7 @@ Every screen has its own address, so Back, reload and a shared link go where you
 | `/games/<id>` | One game (`/games/count`, `/games/spelling`...); built ahead of time for every id |
 | `/stickers` | The sticker album |
 | `/about` | What Little Steps is, in words for a parent. No links that lead off the site |
-| `/parents` · `/parents/child` · `progress` · `settings` · `voice` · `pictures` · `privacy` | Everything for grown-ups, behind a press-and-hold lock (`ParentGate`). Open for 15 minutes in that tab, then it closes |
+| `/parents` · `/parents/child` · `progress` · `settings` · `voice` · `pictures` · `share` · `privacy` | Everything for grown-ups, behind a press-and-hold lock (`ParentGate`). Open for 15 minutes in that tab, then it closes |
 
 A header runs across the top (`AppShell.tsx`): a back arrow, where you are (`nav.ts` is the one table of titles and
 "back" targets), the sticker count and a menu panel from the right. In a game it carries the blue ▶ for play mode
@@ -77,7 +77,7 @@ inside the game (`GameScreen.tsx`) carries the controls, so the game keeps the r
 | Letters & Numbers | The same, for A–Z, a–z and 0–9 | Capital / small / both / numbers. Always **in order** (A to Z, a to z, 0 to 9; for both, a capital then its small form), carrying on where they left off; an unfinished one returns and the settings have "Start the order again". The level is **how much of each is traced**: 1 the start of it (about a third to a half of the line), 2 most of it (about two thirds to four fifths), 3 all of it. The whole letter always shows faintly; only the part has the dotted guide, and tracing on past it is fine |
 | Matching Objects | Joins each picture on one side to its twin on the other | Draw a line, or tap one then its twin; 2–6 pairs. Pictures from five themes, or **capital letters on the left matched to small letters on the right** (short rounds use the letters whose small form looks like the capital, such as C/c; an I and an L never share a round), or **a word on the left matched to its picture on the right**: things (30 drawings), animals (14, six drawn just for this) or colours (7 swatches). Words in a round start with different letters |
 | How Many? | Counts a group of the same thing and taps the number | Tap each thing to count it (1, 2, 3 appear); 5 questions; level 1 is up to 3, level 3 up to 10 |
-| Connect the Dots | Taps numbered dots in order; the shape closes and fills in | 8 pictures (kite, house, boat, arrow, star, rocket, tree, heart); level 1 is 4–6 dots, 3 is 11–16 |
+| Connect the Dots | Draws a line from dot to dot: press on dot 1 and drag to 2, then on to 3 without lifting. Tapping the next dot works too. The shape closes and fills in | 8 pictures (kite, house, boat, arrow, star, rocket, tree, heart); level 1 is 4–6 dots, 3 is 11–16 |
 | What Comes Next? | Picks the picture that carries a pattern on | A-B, then A-A-B / A-B-B, then A-B-C; coloured shapes, shapes, or drawings; 5 questions |
 | Sort It | Drags a picture to the right bin | By colour, shape, size or what it is; 2–3 bins, 4–8 things |
 | Odd One Out | Taps the one that is different | Another kind of thing (3 or 4 pictures), later a different colour, shape or size |
@@ -145,6 +145,16 @@ file that `scripts/test-thinking.mts` runs thousands of rounds of.
     the sparkle; let go anywhere else and it stays where it was dropped, with no buzz and no score. Tapping a piece,
     then its place, works too. A faint copy of the photo on the board is on by default and can be switched off. The
     usual hint pulses the place for the piece last touched.
+- **Draw the line (Connect the Dots).** A line follows the finger from the last joined dot. When it comes within reach
+  of the next dot it clicks on and carries on from there, so a whole picture can be drawn without lifting. Lifting
+  early just removes the loose line; nothing joined is lost. Tapping the next dot still joins it, for a child who finds
+  drawing hard. Letting go on a dot that is not next gets the same soft buzz and shake as tapping it. How close counts
+  as "on a dot" (`dotReach` in `thinking/rounds.ts`) is up to 32 units but never more than 48% of the gap to the
+  nearest dot, so two dots never share a place. If the child is stuck, the next dot pulses and a dotted line shows the way.
+- **Share the app.** *For parents → Share the app* (`ShareApp.tsx`): the phone's own share sheet where there is one, copy
+  the link, WhatsApp, email, and a QR code for another phone to scan (`share/share.ts`; the QR grid comes from the small
+  `qrcode-generator` package and is drawn here as one SVG path, so it works offline). Only the address of the app is
+  shared, never anything about the child, and sharing is not counted.
 - **Stickers.** Each finished round earns one of 30 stickers, chosen at random, shown in an album the
   child can open. Nothing is ever taken away; an unfinished round earns nothing.
 - **Parent summary.** *For parents → This week*: rounds finished in the last 7 days (a small bar chart and a
@@ -210,6 +220,7 @@ src/games/
 ├── gameDefs.ts · profile.ts · progress.ts · stats.ts (anonymous counts)
 ├── VoiceSettings.tsx · voice/ (store.ts IndexedDB, player.ts Web Audio, pick.ts which clip)
 ├── PicturesSettings.tsx · JigsawGame.tsx (photo or drawn, each round) · PhotoJigsaw.tsx
+├── ShareApp.tsx · share/share.ts (message, links, QR)
 ├── pictures/ cut.ts (the cut and the table) · prepare.ts (crop and shrink) · store.ts (IndexedDB) · prefs.ts (choices, next picture)
 ├── feedback.ts (voice, ding, buzz, chime) · sprinkles.tsx · useStuck.ts
 ├── HoldToUnlock.tsx · InfoButton.tsx · PwaInstall.tsx · icons.tsx
@@ -277,10 +288,11 @@ node scripts/test-trace.mts      # tracing judge: wobble vs wanders, all shapes 
 node scripts/test-spot.mts       # 10,000 generated picture pairs are sound
 node scripts/test-match.mts      # 10,000 picture rounds, 7,500 letter rounds and 12,000 word rounds are sound
 node scripts/test-voice.mts      # which recorded message is picked: it exists, random, never the same twice running
-node scripts/test-thinking.mts   # How Many?, patterns, Sort It, Odd One Out, Jigsaw and Connect the Dots: every round has one right answer
+node scripts/test-thinking.mts   # How Many?, patterns, Sort It, Odd One Out, Jigsaw and Connect the Dots: every round has one right answer; dots can be found by a finger without ever sharing a place
 node scripts/test-habits.mts     # the habit cards: unique, balanced rounds, and gentle wording (no "bad", "naughty"...)
 node scripts/test-progress.mts   # counting, stickers, weekly summary, damaged data
 node scripts/test-stats.mts      # pings are cleaned before they are kept; names are capped; India's day
+node scripts/test-share.mts      # share links are encoded and carry only the address; the QR code has its three corner marks
 node scripts/test-jigsaw.mts     # photo Jigsaw: every cut fits and adds up to the picture, knobs stay in their room, crops, next picture
 ```
 
