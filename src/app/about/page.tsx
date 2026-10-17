@@ -38,9 +38,9 @@ export default function AboutPage() {
       <h2 className="sq-subhead">Privacy</h2>
       <p className="sq-ph-text">
         Your child’s rounds, stickers, details and any voice recordings stay on the phone or computer they are made on.
-        The only thing sent is an anonymous count of visits and finished rounds, which you can switch off, and which is
-        never sent if your browser says Do Not Track. A child’s first name is shared only if you turn that on, and
-        switching it off deletes it.
+        The only things sent are an anonymous count of visits and finished rounds, and page views through Vercel
+        Analytics (no cookies). You can switch both off, and neither is sent if your browser says Do Not Track. A
+        child’s first name is shared only if you turn that on, and switching it off deletes it.
       </p>
 
       <p className="sq-note">

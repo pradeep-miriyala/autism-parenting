@@ -29,7 +29,8 @@ export function newShareId(): string {
   return Array.from(b, x => x.toString(36).padStart(2, '0')).join('').slice(0, 24)
 }
 
-function allowed(): boolean {
+/** False for a development build and for a browser that sends Do Not Track or Global Privacy Control. */
+export function countingAllowed(): boolean {
   if (process.env.NODE_ENV !== 'production') return false
   const nav = navigator as Navigator & { globalPrivacyControl?: boolean; msDoNotTrack?: string }
   if (nav.doNotTrack === '1' || nav.msDoNotTrack === '1' || nav.globalPrivacyControl === true) return false
@@ -67,7 +68,7 @@ export function useStats({ enabled, game, share }: { enabled: boolean; game: str
 
   const beat = useCallback(() => {
     const { enabled: on, game: g } = live.current
-    if (!on || !allowed() || !visit.current) return
+    if (!on || !countingAllowed() || !visit.current) return
     if (document.visibilityState !== 'visible' || Date.now() - lastInput.current > IDLE_MS) return
     post({ e: 'hb', v: visit.current, g, ...extras(false) })
   }, [extras])
@@ -93,7 +94,7 @@ export function useStats({ enabled, game, share }: { enabled: boolean; game: str
 
   const round = useCallback((g: string) => {
     const { enabled: on } = live.current
-    if (!on || !allowed() || !visit.current) return
+    if (!on || !countingAllowed() || !visit.current) return
     post({ e: 'round', v: visit.current, g, ...extras(true) })
   }, [extras])
 

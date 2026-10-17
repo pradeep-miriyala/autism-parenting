@@ -14,6 +14,7 @@ import { useApp } from './store'
 import { ShellCtx } from './shellContext'
 import HoldToUnlock from './HoldToUnlock'
 import PwaInstall from './PwaInstall'
+import GatedAnalytics from './GatedAnalytics'
 import { AlbumIcon, BackIcon, ChevronIcon, CloseIcon, HomeIcon, InfoIcon, LandscapeIcon, LockIcon, MenuIcon, PlayIcon, PortraitIcon, SpeakerIcon } from './icons'
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
@@ -184,6 +185,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       {app.toast && <div className="sq-toast" role="status">{app.toast}</div>}
 
       <PwaInstall />
+      <GatedAnalytics />
     </ShellCtx.Provider>
   )
 }

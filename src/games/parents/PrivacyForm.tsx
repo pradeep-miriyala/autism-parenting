@@ -14,8 +14,9 @@ export default function PrivacyForm() {
           <span>Count our visits anonymously, to show how many people use these games</span>
         </label>
         <p className="sq-note">
-          Only which game is open and how many rounds are finished. No name, no address, no cookie and nothing that
-          identifies you or your child. Nothing is counted if your browser says Do Not Track.
+          Only which game is open and how many rounds are finished, and which pages are looked at (through Vercel
+          Analytics, which uses no cookies). No name, no address and nothing that identifies you or your child. Nothing
+          is counted if your browser says Do Not Track, or if you switch this off.
         </p>
         <label className="sq-inline">
           <input type="checkbox" checked={shareName} disabled={!shareCounts || (!shareName && !profile.name.trim())}

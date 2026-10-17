@@ -176,6 +176,10 @@ in development builds. Name sharing is off by default and needs counting on. The
 never reports errors to the page, drops malformed bodies, caps size, and rate-limits per address in
 memory (the address is never stored).
 
+**Vercel Analytics** (page views, no cookies) is held to the same switches by `GatedAnalytics.tsx`: it is not loaded
+for a browser that sends Do Not Track or Global Privacy Control, or when counting is off, and if counting is switched
+off later every further event is dropped in `beforeSend`. It also has to be enabled in the Vercel project's Analytics tab.
+
 ### Where the code is
 
 ```
