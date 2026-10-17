@@ -8,7 +8,7 @@ export default function PrivacyForm() {
     <div className="ls-page">
       <h1 className="ls-h1">Privacy</h1>
       <div className="sq-parent ls-card">
-        <p className="sq-note">Your child’s rounds, stickers, details and any voice recordings you make stay on this phone or computer.</p>
+        <p className="sq-note">Your child’s rounds, stickers, details, any voice recordings you make and any photos you add stay on this phone or computer.</p>
         <label className="sq-inline">
           <input type="checkbox" checked={shareCounts} onChange={e => changeCounting(e.target.checked)} />
           <span>Count our visits anonymously, to show how many people use these games</span>

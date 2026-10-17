@@ -15,7 +15,7 @@ import CountGame from './CountGame'
 import PatternGame from './PatternGame'
 import SortGame from './SortGame'
 import OddGame from './OddGame'
-import PuzzleGame from './PuzzleGame'
+import JigsawGame from './JigsawGame'
 import DotsGame from './DotsGame'
 import KeyGame from './KeyGame'
 import { WORD_SETS } from './match/generate'
@@ -161,7 +161,7 @@ export default function GameScreen({ id }: { id: GameId }) {
         : id === 'pattern' ? <PatternGame level={level} {...common} />
         : id === 'sort' ? <SortGame level={level} {...common} />
         : id === 'odd' ? <OddGame level={level} {...common} />
-        : id === 'puzzle' ? <PuzzleGame level={level} {...common} />
+        : id === 'puzzle' ? <JigsawGame level={level} {...common} />
         : id === 'dots' ? <DotsGame level={level} {...common} />
         : id === 'habits' ? <HabitsGame count={level} {...common} />
         : <KeyGame id={id} length={level} wordType={app.wordType} {...common} />}

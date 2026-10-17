@@ -285,8 +285,11 @@ export function makeOddRound(level: number, rand: () => number = Math.random): O
 
 
 // ════════════ puzzle ════════════
-export const PUZZLE_GRID: Record<number, { cols: number; rows: number }> = { 1: { cols: 2, rows: 2 }, 2: { cols: 3, rows: 2 }, 3: { cols: 3, rows: 3 } }
-export const puzzleGrid = (level: number) => PUZZLE_GRID[Math.min(3, Math.max(1, Math.round(level)))]
+export const PUZZLE_GRID: Record<number, { cols: number; rows: number }> = {
+  1: { cols: 2, rows: 2 }, 2: { cols: 3, rows: 2 }, 3: { cols: 3, rows: 3 }, 4: { cols: 4, rows: 3 },
+}
+/** The drawn pictures stop at twelve pieces (every piece needs a drawing of its own); photos go further. */
+export const puzzleGrid = (level: number) => PUZZLE_GRID[Math.min(4, Math.max(1, Math.round(level)))]
 
 /** The pieces are numbered 0.. across then down. `tray` is the order they sit in, never the finished order. */
 export function makePuzzle(level: number, rand: () => number = Math.random): { cols: number; rows: number; tray: number[] } {
@@ -373,6 +376,24 @@ export function makeDotsRound(level: number, rand: () => number = Math.random, a
   const design = pool[Math.min(pool.length - 1, Math.floor(rand() * pool.length))]
   const want = Math.max(design.corners.length, lo + Math.floor(rand() * (hi - lo + 1)))
   return { design, dots: dotsFor(design, Math.min(want, hi)) }
+}
+
+/**
+ * How close a finger has to be to count as "on" a dot: nearly the size of a fingertip, but never so big that two
+ * neighbouring dots share a place. Drawing the line and tapping both use it.
+ */
+export const DOT_REACH_MAX = 32
+export function dotReach(dots: P[]): number {
+  let gap = Infinity
+  for (let i = 0; i < dots.length; i++) for (let j = i + 1; j < dots.length; j++) gap = Math.min(gap, dist(dots[i], dots[j]))
+  return Math.min(DOT_REACH_MAX, gap * 0.48)
+}
+
+/** The dot a point is on (the nearest within `reach`), or -1. */
+export function dotAt(dots: P[], p: P, reach: number): number {
+  let best = -1, bestD = reach
+  dots.forEach((d, i) => { const k = dist(d, p); if (k <= bestD) { best = i; bestD = k } })
+  return best
 }
 
 /** Do two segments cross (not just meet at an end)? For checking that an outline does not cross itself. */
