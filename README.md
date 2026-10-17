@@ -81,7 +81,7 @@ inside the game (`GameScreen.tsx`) carries the controls, so the game keeps the r
 | What Comes Next? | Picks the picture that carries a pattern on | A-B, then A-A-B / A-B-B, then A-B-C; coloured shapes, shapes, or drawings; 5 questions |
 | Sort It | Drags a picture to the right bin | By colour, shape, size or what it is; 2–3 bins, 4–8 things |
 | Odd One Out | Taps the one that is different | Another kind of thing (3 or 4 pictures), later a different colour, shape or size |
-| Jigsaw | Drags pieces onto a board that shows the picture faintly. With a parent's photo it is a free table: pieces lie loose and are moved anywhere (see *Your pictures*) | 4, 6, 9 or 12 pieces; in the drawn version every piece has a drawing of its own, so no two pieces look alike |
+| Jigsaw | Drags pieces onto a board that shows the picture faintly. With a parent's photo it is a free table: pieces lie loose and are moved anywhere (see *Your pictures*) | 4, 6, 9 or 12 pieces, and with a photo also 24 and 36; in the drawn version (which stops at 12) every piece has a drawing of its own, so no two pieces look alike |
 | Helpful Habits | A card shows something a child does; drag it to "Helps me" or "Does not help me" (or tap the bucket) | 28 cards; 3–10 per round; right = sparkle and a sentence ("Brushing my teeth helps me."); wrong = buzz and the card slides back; no "good"/"bad" wording |
 
 The home screen groups the games (Numbers, Thinking, Letters and writing, Everyday life) in `GAME_GROUPS` and
@@ -137,11 +137,11 @@ file that `scripts/test-thinking.mts` runs thousands of rounds of.
   then plays either a photo or a drawn picture each round: a parent chooses *my photos and the drawn pictures*
   (about half each, never the same photo twice running), *only my photos*, or *only the drawn pictures*. With no
   photos, or a browser that cannot keep them, it is the drawn pictures exactly as before.
-  - **How a photo is cut** (`pictures/cut.ts`, pure geometry). A grid of 4, 6, 9 or 12 pieces. Every inner edge gets
+  - **How a photo is cut** (`pictures/cut.ts`, pure geometry). A grid of 4, 6, 9, 12, 24 (6 by 4) or 36 (6 by 6) pieces. Every inner edge gets
     a random knob or hole (a different one each round); two neighbours share one curve, so they always fit and the
     pieces add up to exactly the picture. A parent can switch to plain edges (straight cuts, no knobs).
   - **How it plays** (`PhotoJigsaw.tsx`). The board is at the top and the loose pieces lie on a shelf under it, all in
-    one SVG. A child drags a piece anywhere. Let go near its place (about 40% of a piece away) and it clicks in with
+    one SVG. A child drags a piece anywhere. Let go near its place (about 40% of a piece away, and never less than 22 units, so small pieces are still easy to place) and it clicks in with
     the sparkle; let go anywhere else and it stays where it was dropped, with no buzz and no score. Tapping a piece,
     then its place, works too. A faint copy of the photo on the board is on by default and can be switched off. The
     usual hint pulses the place for the piece last touched.

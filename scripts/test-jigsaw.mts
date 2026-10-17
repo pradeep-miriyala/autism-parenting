@@ -40,12 +40,12 @@ const outline = (cut: ReturnType<typeof makeCut>, i: number) => SIDES.flatMap(s 
 const area = (pts: Pt[]) => Math.abs(pts.reduce((a, p, k) => { const q = pts[(k + 1) % pts.length]; return a + p.x * q.y - q.x * p.y }, 0)) / 2
 
 // ── The grids ──
-check(Object.values(PHOTO_GRID).map(g => g.cols * g.rows).join() === '4,6,9,12', 'four, six, nine and twelve pieces')
-check(photoGrid(0).cols === 2 && photoGrid(9).cols === 4 && photoGrid(2.4).cols === 3, 'a level outside 1 to 4 is held to the nearest')
+check(Object.values(PHOTO_GRID).map(g => g.cols * g.rows).join() === '4,6,9,12,24,36', 'four, six, nine, twelve, 24 and 36 pieces')
+check(photoGrid(0).cols === 2 && photoGrid(9).cols === 6 && photoGrid(9).rows === 6 && photoGrid(2.4).cols === 3, 'a level outside 1 to 6 is held to the nearest')
 
 // ── The cuts ──
 let plus = 0, minus = 0
-for (let level = 1; level <= 4; level++) {
+for (let level = 1; level <= 6; level++) {
   const { cols, rows } = photoGrid(level), n = cols * rows
   const t = tableFor(cols, rows, W, H)
   for (const plain of [false, true]) {
@@ -109,7 +109,7 @@ check(plus > 50 && minus > 50 && Math.abs(plus - minus) < (plus + minus) * 0.2, 
 }
 
 // ── The table ──
-for (let level = 1; level <= 4; level++) {
+for (let level = 1; level <= 6; level++) {
   const { cols, rows } = photoGrid(level), n = cols * rows
   const t = tableFor(cols, rows, W, H)
   check(t.view.x === -t.padX && t.view.y === -t.padY && near(t.view.w, W + 2 * t.padX) && near(t.view.h, t.height + 2 * t.padY), `level ${level}: the view holds the board, the shelf and a margin`)
@@ -135,6 +135,11 @@ for (let level = 1; level <= 4; level++) {
   const home = homeOf(4, 3, 3, W, H)
   check(near(home.x, W / 3) && near(home.y, H / 3), 'the middle piece belongs in the middle')
   check(snapRadius(t.cw, t.ch) > 20 && snapRadius(t.cw, t.ch) < Math.min(t.cw, t.ch) / 2, 'the click-in distance is generous but under half a piece')
+  // at every size: big enough for a fingertip, never so big that the next place along would also count
+  for (let level = 1; level <= 6; level++) {
+    const { cols, rows } = photoGrid(level), tt = tableFor(cols, rows, W, H), r = snapRadius(tt.cw, tt.ch)
+    check(r >= 20 && r < Math.min(tt.cw, tt.ch) / 2, `level ${level}: click-in distance ${r.toFixed(1)} for pieces ${tt.cw.toFixed(0)} by ${tt.ch.toFixed(0)}`)
+  }
 }
 
 // ── Getting a photo ready ──

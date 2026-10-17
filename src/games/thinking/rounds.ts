@@ -288,6 +288,7 @@ export function makeOddRound(level: number, rand: () => number = Math.random): O
 export const PUZZLE_GRID: Record<number, { cols: number; rows: number }> = {
   1: { cols: 2, rows: 2 }, 2: { cols: 3, rows: 2 }, 3: { cols: 3, rows: 3 }, 4: { cols: 4, rows: 3 },
 }
+/** The drawn pictures stop at twelve pieces (every piece needs a drawing of its own); photos go further. */
 export const puzzleGrid = (level: number) => PUZZLE_GRID[Math.min(4, Math.max(1, Math.round(level)))]
 
 /** The pieces are numbered 0.. across then down. `tray` is the order they sit in, never the finished order. */

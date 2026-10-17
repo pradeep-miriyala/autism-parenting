@@ -218,7 +218,7 @@ export default function PhotoJigsaw({ photo, level, plain, guide, sound, profile
       <div className="sq-top">
         <div>
           <div className="sq-label">Finish the picture</div>
-          <div className="sp-dots" aria-hidden="true">
+          <div className={`sp-dots${n > 12 ? ' many' : ''}`} aria-hidden="true">
             {Array.from({ length: n }, (_, i) => <span key={i} className={i < placed.length ? 'on' : ''} />)}
           </div>
         </div>

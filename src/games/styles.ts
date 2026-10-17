@@ -150,7 +150,8 @@ body:has(.sq-wrap.playmode){padding-top:.5rem}
 .pj-table{fill:color-mix(in srgb,var(--accent) 6%,#fff)}
 .pj-shelf{fill:color-mix(in srgb,var(--accent) 9%,#fff);stroke:var(--line);stroke-width:1.5;stroke-dasharray:6 6}
 .pj-board{fill:#fff;stroke:var(--line);stroke-width:2}
-.pj-cut{fill:none;stroke:var(--line);stroke-width:1.2}
+.pj-cut{fill:none;stroke:var(--line);stroke-width:1.2;transition:stroke-opacity .8s}
+.pj-done .pj-cut{stroke-opacity:0}
 .pj-cell{fill:transparent}
 .pj-near{fill:color-mix(in srgb,var(--accent) 22%,transparent);stroke:var(--accent);stroke-width:2.5}
 .pj-hint{fill:color-mix(in srgb,var(--accent) 18%,transparent);stroke:var(--accent);stroke-width:2.5;animation:sp-pulse 1.4s ease-in-out infinite}
@@ -346,6 +347,9 @@ body:has(.sq-wrap.playmode){padding-top:.5rem}
 .sp-dots{display:flex;gap:.4rem;margin-top:.35rem}
 .sp-dots span{width:18px;height:18px;border-radius:50%;border:2px solid var(--accent);background:#fff}
 .sp-dots span.on{background:var(--accent)}
+/* many pieces: smaller dots that wrap, so the row never runs off the card */
+.sp-dots.many{flex-wrap:wrap;gap:.25rem;max-width:calc(100% - 3.5rem)}
+.sp-dots.many span{width:11px;height:11px;border-width:1.5px}
 .sp-hint{animation:sp-pulse 1.8s ease-in-out infinite}
 @keyframes sp-pulse{0%,100%{opacity:.3}50%{opacity:1}}
 @keyframes sp-flash{0%{border-color:var(--accent-3)}100%{border-color:var(--line)}}

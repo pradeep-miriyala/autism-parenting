@@ -8,7 +8,7 @@
 import { readFileSync } from 'node:fs'
 import {
   CATEGORIES, COUNT_QUESTIONS, DESIGNS, DOTS_RANGE, ODD_QUESTIONS, PATTERN_QUESTIONS, SHAPES, SHAPE_COLOURS, SORT_LEVELS, THINGS, UNITS,
-  countLayout, countMax, crosses, DOT_REACH_MAX, dotAt, dotReach, dotsFor, makeCountRound, makeDotsRound, makeOddRound, makePatternRound, makePuzzle, makePuzzleScene, makeSortRound, oddCount, pieceBox,
+  countLayout, countMax, crosses, DOT_REACH_MAX, dotAt, dotReach, dotsFor, makeCountRound, makeDotsRound, makeOddRound, makePatternRound, makePuzzle, makePuzzleScene, puzzleGrid, makeSortRound, oddCount, pieceBox,
 } from '../src/games/thinking/rounds.ts'
 import { COLOURS, seeded } from '../src/games/spot/generate.ts'
 
@@ -121,6 +121,7 @@ for (let level = 1; level <= 4; level++) {
     check(p.tray.every((v, i) => v !== i), `jigsaw level ${level} seed ${s}: a piece already home`)
   }
 }
+check(puzzleGrid(5).cols * puzzleGrid(5).rows === 12 && puzzleGrid(6).cols * puzzleGrid(6).rows === 12, 'the drawn jigsaw stops at twelve pieces, even when the slider is higher')
 check(makePuzzle(1).cols * makePuzzle(1).rows === 4 && makePuzzle(2).cols * makePuzzle(2).rows === 6 && makePuzzle(3).cols * makePuzzle(3).rows === 9 && makePuzzle(4).cols * makePuzzle(4).rows === 12, 'four, six, nine and twelve pieces')
 {
   const boxes = Array.from({ length: 6 }, (_, i) => pieceBox(i, 3, 2, 300, 200))

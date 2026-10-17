@@ -210,7 +210,7 @@ export const GAME_SETTINGS: Record<GameId, { min: number; max: number; def: numb
   pattern: { min: 1, max: 3, def: 1, label: 'What comes next?: how long the pattern is (1 is two things, 3 is three)' },
   sort: { min: 1, max: 3, def: 1, label: 'Sort it: how many things to sort (1 is four, 3 is eight)' },
   odd: { min: 1, max: 3, def: 1, label: 'Odd one out: how alike they are (1 is very different)' },
-  puzzle: { min: 1, max: 4, def: 1, label: 'Jigsaw: pieces (1 is four, 4 is twelve)' },
+  puzzle: { min: 1, max: 6, def: 1, label: 'Jigsaw: pieces (1 is four, 4 is twelve, 5 is 24, 6 is 36)', note: 'Levels 5 and 6 are for your own photos. The drawn pictures stop at twelve pieces.' },
   dots: { min: 1, max: 3, def: 1, label: 'Connect the dots: how many dots (1 is up to 6, 3 is up to 15)' },
 }
 

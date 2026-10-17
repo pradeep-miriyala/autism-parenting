@@ -29,8 +29,9 @@ export type Cut = {
 
 export const PHOTO_GRID: Record<number, { cols: number; rows: number }> = {
   1: { cols: 2, rows: 2 }, 2: { cols: 3, rows: 2 }, 3: { cols: 3, rows: 3 }, 4: { cols: 4, rows: 3 },
+  5: { cols: 6, rows: 4 }, 6: { cols: 6, rows: 6 },
 }
-export const photoGrid = (level: number) => PHOTO_GRID[Math.min(4, Math.max(1, Math.round(level)))]
+export const photoGrid = (level: number) => PHOTO_GRID[Math.min(6, Math.max(1, Math.round(level)))]
 
 function makeKnob(rand: Rand): Knob {
   const j = () => (rand() * 2 - 1) * JITTER
@@ -134,8 +135,11 @@ export function tableFor(cols: number, rows: number, w: number, h: number): Tabl
 export const homeOf = (index: number, cols: number, rows: number, w: number, h: number): Pt =>
   ({ x: (index % cols) * (w / cols), y: Math.floor(index / cols) * (h / rows) })
 
-/** A piece clicks in when it is let go this close to its place. Generous: small hands are not exact. */
-export const snapRadius = (cw: number, ch: number) => 0.4 * Math.min(cw, ch)
+/**
+ * A piece clicks in when it is let go this close to its place. Generous: small hands are not exact. Small pieces get
+ * a little more than 40% of their size, but always under half, so a piece is never taken by the place next door.
+ */
+export const snapRadius = (cw: number, ch: number) => Math.min(0.49 * Math.min(cw, ch), Math.max(0.4 * Math.min(cw, ch), 22))
 
 /** Keep a piece's square on the table. */
 export function clampPos(p: Pt, t: Table, w: number): Pt {

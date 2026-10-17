@@ -126,7 +126,7 @@ export default function PicturesSettings() {
         <span>Plain edges: straight cuts with no knobs, which are easier to see</span>
       </label>
       <p className="sq-note">
-        How many pieces there are is set in Game settings (Jigsaw: from 4 to 12).
+        How many pieces there are is set in Game settings (Jigsaw: from 4 up to 36 pieces).
       </p>
       <p className="ls-links"><Link href="/games/puzzle" className="sq-btn">Try the Jigsaw</Link></p>
       <p className="sq-note">
