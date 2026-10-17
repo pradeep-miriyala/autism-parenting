@@ -1,0 +1,72 @@
+/* The design tokens the games were made with, and the page furniture around them. */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+:root {
+  --bg:        #F5F2EC;
+  --bg-soft:   #EAE5DA;
+  --ink:       #16130F;
+  --ink-70:    #3B342C;
+  --ink-50:    #6D6357;
+  --ink-30:    #766D60;
+  --accent:    #2E3A6B;   /* indigo */
+  --accent-2:  #9E2B25;   /* madder */
+  --accent-3:  #886920;   /* ochre */
+  --line:      rgba(22,19,15,0.15);
+  --line-soft: rgba(22,19,15,0.07);
+  --surface:   #FBF9F5;
+  --ok:        #217D4F;
+  --error:     #A32118;
+
+  --nav-h:     56px;
+  --px:        3rem;
+
+  /* The admin pages (the dashboard) use these older names. */
+  --amber:      var(--bg);
+  --amber-dark: var(--bg-soft);
+  --rust:       var(--accent);
+  --teal:       var(--accent-2);
+  --gold:       var(--accent-3);
+  --border:     var(--line);
+  --border-mid: var(--line-soft);
+  --ink-60:     var(--ink-70);
+
+  --f-display: 'Faustina', Georgia, serif;
+  --f-body:    'Literata', Georgia, serif;
+  --f-ui:      'Karla', system-ui, sans-serif;
+}
+@media (max-width: 860px) { :root { --px: 1.5rem; } }
+@media (max-width: 480px) { :root { --px: 1rem; } }
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--f-ui);
+  font-weight: 400;
+  line-height: 1.7;
+}
+a { text-decoration: none; color: inherit; }
+button, input, select, textarea { font-family: var(--f-ui); }
+
+.eyebrow {
+  font-family: var(--f-ui); font-weight: 600;
+  font-size: 0.66rem; letter-spacing: 0.22em; text-transform: uppercase;
+  color: var(--accent);
+}
+
+/* The bar across the top, and the footer. Both step aside while a game is open (see games/styles.ts). */
+.nav {
+  display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+  min-height: var(--nav-h); padding: 0 var(--px); border-bottom: 1px solid var(--line);
+  background: var(--bg);
+}
+.nav-brand { font-family: var(--f-display); font-weight: 600; font-size: 1.15rem; color: var(--ink); }
+.nav-by { font-size: 0.72rem; letter-spacing: 0.08em; color: var(--ink-50); }
+.nav-by:hover, .nav-by:focus-visible { color: var(--accent); }
+
+.footer { padding: 2.5rem var(--px) 3rem; border-top: 1px solid var(--line); background: var(--surface); }
+.footer-inner { max-width: 640px; margin: 0 auto; display: grid; gap: 0.9rem; }
+.footer p { font-size: 0.82rem; line-height: 1.65; color: var(--ink-70); }
+.footer-links { display: flex; gap: 1.2rem; flex-wrap: wrap; font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; }
+.footer-links a { color: var(--ink-50); }
+.footer-links a:hover, .footer-links a:focus-visible { color: var(--accent); }
