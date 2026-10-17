@@ -3,6 +3,10 @@
 // quiet pill the Learning Lab uses. Chrome only fires beforeinstallprompt once
 // it judges the visit engaged; iOS Safari never does, so there the pill gives
 // the one instruction that works, after the visit has lasted a while.
+//
+// Little Steps used to live on the portfolio site. Someone who installed it from there is sent here with
+// `?moved=1` (see the portfolio's next.config.js), and gets a one-time note that this is the new home and
+// the old icon can go. The marker is taken off the address straight away, so a reload does not repeat it.
 import { useEffect, useState } from 'react'
 
 type InstallPromptEvent = Event & {
@@ -29,8 +33,19 @@ function isIosSafari() {
 export default function PwaInstall() {
   const [deferred, setDeferred] = useState<InstallPromptEvent | null>(null)
   const [iosHint, setIosHint] = useState(false)
+  const [moved, setMoved] = useState(false)
 
   useEffect(() => {
+    try {
+      const q = new URLSearchParams(location.search)
+      if (q.get('moved') === '1') {
+        setMoved(true)
+        q.delete('moved')
+        const rest = q.toString()
+        history.replaceState(null, '', location.pathname + (rest ? `?${rest}` : '') + location.hash)
+      }
+    } catch {}
+
     // Dev chunks change on every edit, so a cache-first worker would break HMR.
     if ('serviceWorker' in navigator && process.env.NODE_ENV === 'production') {
       navigator.serviceWorker
@@ -51,7 +66,7 @@ export default function PwaInstall() {
 
     if (isStandalone()) return
 
-    try { if (localStorage.getItem(DISMISS_KEY) === '1') return } catch {}
+    try { if (localStorage.getItem(DISMISS_KEY) === '1') return } catch {}   // (the moved note above ignores this)
 
     const onPrompt = (e: Event) => { e.preventDefault(); setDeferred(e as InstallPromptEvent) }
     const onInstalled = () => setDeferred(null)
@@ -72,6 +87,7 @@ export default function PwaInstall() {
     try { localStorage.setItem(DISMISS_KEY, '1') } catch {}
     setDeferred(null)
     setIosHint(false)
+    setMoved(false)
   }
 
   async function install() {
@@ -81,14 +97,18 @@ export default function PwaInstall() {
     setDeferred(null)
   }
 
-  if (!deferred && !iosHint) return null
+  if (!deferred && !iosHint && !moved) return null
 
   return (
     <div className="pr-install" role="region" aria-label="Install Little Steps">
       <img src="/icon-192.png" alt="" width={36} height={36} />
       <div className="pr-install-text">
-        <strong>Add Little Steps to your home screen</strong>
-        <span>{deferred ? 'Opens straight to the games.' : 'Tap Share, then “Add to Home Screen”.'}</span>
+        <strong>{moved ? 'Little Steps has a new home' : 'Add Little Steps to your home screen'}</strong>
+        <span>
+          {moved
+            ? `This is it. You can delete the old icon, then ${deferred ? 'tap Install' : 'add this page to your home screen'}. Settings and stickers start fresh here.`
+            : deferred ? 'Opens straight to the games.' : 'Tap Share, then “Add to Home Screen”.'}
+        </span>
       </div>
       {deferred && (
         <button type="button" className="pr-install-go" onClick={install}>Install</button>
