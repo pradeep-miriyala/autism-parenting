@@ -1,5 +1,7 @@
 // src/lib/stats.ts
-// What the Little Steps games report, and what the admin dashboard reads back.
+// What the Little Steps games report, and how it is kept. The dashboard that reads it back is not in this
+// repo: it is Admin → Little Steps on the portfolio site (src/lib/parentingStats.ts there is this file plus the
+// read side), so there is one admin for everything. A change to the records or the games list goes in both.
 //
 // Privacy is the design, not a layer on top of it:
 //   * Every number is a COUNT. There are no per-person rows, no IP address, no user agent, no
@@ -7,11 +9,11 @@
 //   * "Who is on the page now" is a random id made fresh in the browser on each page load. It lives
 //     in `parenting_live` for a few minutes (a TTL index removes it) and is never linked to anything.
 //   * A child's first name is kept ONLY if a parent switches sharing on, in `parenting_shared`,
-//     under a random id the browser holds. Switching sharing off deletes that record, and the admin
-//     can delete one too. It expires on its own after a year without a visit.
+//     under a random id the browser holds. Switching sharing off deletes that record, and the portfolio
+//     admin can delete one too. It expires on its own after a year without a visit.
 //
 // Takes the Db as an argument, and imports only types from mongodb, so scripts/test-stats.mts
-// can run all of it against a throwaway database.
+// can check the cleaning without a database.
 
 import type { Db } from 'mongodb'
 
@@ -39,7 +41,6 @@ export const LIVE_TTL_S = 15 * 60
 export const SHARED_TTL_S = 365 * 24 * 3600
 /** Each heartbeat stands for about this much time with the page open and in use. */
 export const HEARTBEAT_SECONDS = 30
-export const DASHBOARD_DAYS = 14
 
 export type Ping = {
   e: 'hb' | 'round' | 'forget'
@@ -132,77 +133,4 @@ export async function recordPing(db: Db, ping: Ping, now = new Date()) {
     if (ping.e === 'round') update.$inc = { rounds: 1, [`games.${ping.g}`]: 1 }
     await shared.updateOne({ _id: ping.id }, update as any, { upsert: true })
   }
-}
-
-export type DayRow = { day: string; visits: number; played: number; rounds: number; minutes: number }
-export type Dashboard = {
-  live: { total: number; playing: number; onTiles: number; byGame: Partial<Record<PGame, number>> }
-  today: DayRow
-  days: DayRow[]                                     // oldest first
-  week: { visits: number; played: number; rounds: number; minutes: number }
-  byGame: { game: PGame; rounds: number; minutes: number }[]
-  shared: { id: string; name: string; age?: AgeBand; firstSeen: string; lastSeen: string; rounds: number; games: Partial<Record<PGame, number>> }[]
-}
-
-type DailyDoc = { _id: string; visits?: number; played?: number; rounds?: number; homeHb?: number; games?: Partial<Record<PGame, { hb?: number; rounds?: number }>> }
-
-/** The last `n` days, today last, with the days nothing happened filled in as zero. */
-export function summariseDaily(docs: DailyDoc[], now: Date, n = DASHBOARD_DAYS) {
-  const byDay = new Map(docs.map(d => [d._id, d]))
-  const days: DayRow[] = []
-  const perGame = new Map<PGame, { rounds: number; hb: number }>(PARENTING_GAMES.map(g => [g, { rounds: 0, hb: 0 }]))
-  for (let i = n - 1; i >= 0; i--) {
-    const day = istDay(new Date(now.getTime() - i * 86_400_000))
-    const d = byDay.get(day)
-    let hb = d?.homeHb || 0
-    for (const g of PARENTING_GAMES) {
-      const x = d?.games?.[g]
-      const row = perGame.get(g)!
-      row.rounds += x?.rounds || 0
-      row.hb += x?.hb || 0
-      hb += x?.hb || 0
-    }
-    days.push({ day, visits: d?.visits || 0, played: d?.played || 0, rounds: d?.rounds || 0, minutes: Math.round((hb * HEARTBEAT_SECONDS) / 60) })
-  }
-  const week = days.reduce((a, d) => ({ visits: a.visits + d.visits, played: a.played + d.played, rounds: a.rounds + d.rounds, minutes: a.minutes + d.minutes }),
-    { visits: 0, played: 0, rounds: 0, minutes: 0 })
-  const byGame = PARENTING_GAMES.map(g => ({ game: g, rounds: perGame.get(g)!.rounds, minutes: Math.round((perGame.get(g)!.hb * HEARTBEAT_SECONDS) / 60) }))
-  return { days, week, byGame }
-}
-
-export async function loadDashboard(db: Db, now = new Date()): Promise<Dashboard> {
-  const first = istDay(new Date(now.getTime() - (DASHBOARD_DAYS - 1) * 86_400_000))
-  const [liveRows, dailyDocs, sharedRows] = await Promise.all([
-    db.collection('parenting_live').aggregate<{ _id: string; n: number }>([
-      { $match: { seenAt: { $gte: new Date(now.getTime() - ACTIVE_MS) } } },
-      { $group: { _id: '$g', n: { $sum: 1 } } },
-    ]).toArray(),
-    db.collection('parenting_daily').find({ _id: { $gte: first as any } }).toArray(),
-    db.collection('parenting_shared').find({}).sort({ lastSeen: -1 }).limit(300).toArray(),
-  ])
-
-  const byLive: Partial<Record<PGame, number>> = {}
-  let total = 0, onTiles = 0
-  for (const r of liveRows) {
-    total += r.n
-    if (r._id === 'home') onTiles += r.n
-    else byLive[r._id as PGame] = r.n
-  }
-  const { days, week, byGame } = summariseDaily(dailyDocs as unknown as DailyDoc[], now)
-  return {
-    live: { total, playing: total - onTiles, onTiles, byGame: byLive },
-    today: days[days.length - 1],
-    days, week, byGame,
-    shared: sharedRows.map((s: any) => ({
-      id: String(s._id), name: s.name, age: s.age,
-      firstSeen: new Date(s.firstSeen).toISOString(), lastSeen: new Date(s.lastSeen).toISOString(),
-      rounds: s.rounds || 0, games: s.games || {},
-    })),
-  }
-}
-
-/** Admin: remove one shared name, for a parent who asks, or because it should not be there. */
-export async function deleteShared(db: Db, id: string): Promise<boolean> {
-  const r = await db.collection<{ _id: string }>('parenting_shared').deleteOne({ _id: id })
-  return r.deletedCount === 1
 }

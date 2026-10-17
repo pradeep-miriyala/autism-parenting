@@ -21,13 +21,6 @@ html { scroll-behavior: smooth; }
   --nav-h:     56px;
   --px:        3rem;
 
-  /* The admin pages (the dashboard) use these older names. */
-  --amber:      var(--bg);
-  --amber-dark: var(--bg-soft);
-  --rust:       var(--accent);
-  --teal:       var(--accent-2);
-  --gold:       var(--accent-3);
-  --border:     var(--line);
   --border-mid: var(--line-soft);
   --ink-60:     var(--ink-70);
 

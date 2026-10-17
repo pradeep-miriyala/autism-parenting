@@ -1,7 +1,7 @@
 // public/sw.js — Little Steps service worker.
 //
 // Scoped to the whole site, but it only ever answers the home page (and the files it needs) from its saved
-// copy: the dashboard and the API are never touched. It lets the games open and run with no connection once
+// copy: the API is never touched. It lets the games open and run with no connection once
 // they have been visited.
 
 const VERSION = 'ls-v1'
@@ -104,7 +104,7 @@ self.addEventListener('fetch', (event) => {
   if (url.pathname.startsWith('/api/')) return
 
   if (request.mode === 'navigate') {
-    // Only the home page; /admin and the rest go straight to the network.
+    // Only the home page; the rest goes straight to the network.
     if (url.pathname === '/') event.respondWith(navigationStrategy(request))
     return
   }

@@ -14,11 +14,12 @@ npm install
 cp .env.local.example .env.local     # fill in; see below
 npm run dev                          # http://localhost:3000
 npm test                             # every round of every game, thousands of generated cases
-npm run test:stats                   # the dashboard numbers, against a throwaway database
+npm run test:stats                   # that the counts are cleaned before they are kept
 ```
 
-The games need nothing but the code. The database is only for the anonymous counts and the dashboard, and
-the admin login only for the dashboard: with neither configured, the games still run.
+The games need nothing but the code. The database is only for the anonymous counts: without it the games
+still run. There is **no admin here**. The numbers are read in Admin → Little Steps on the portfolio site,
+so there is one place to look at everything.
 
 ### Environment
 
@@ -26,25 +27,22 @@ the admin login only for the dashboard: with neither configured, the games still
 |---|---|
 | `MONGODB_URI` | The database for the anonymous counts and shared names |
 | `MONGODB_DB` | Database name (default `pradeep-site`, where the numbers already live) |
-| `ADMIN_EMAIL` · `ADMIN_PASSWORD_PLAIN` · `NEXTAUTH_SECRET` | Sign in to `/admin` |
-| `NEXTAUTH_URL` | This site's address (`http://localhost:3000` locally; the real address in production) |
 | `NEXT_PUBLIC_SITE_URL` | Optional: this site's address, for previews |
 | `NEXT_PUBLIC_PORTFOLIO_URL` | Where the "By Pradeep Miriyala" links go (default `https://pradeep.miriyala.in`) |
 
 ## Deploying (Vercel)
 
 1. Import the GitHub repository as a new Vercel project (framework: Next.js, nothing else to set).
-2. Add the environment variables above. Set `NEXTAUTH_URL` to the address the site will be served from.
+2. Add the environment variables above (`MONGODB_URI` must be the same database the portfolio admin reads).
 3. Add the subdomain under Project → Settings → Domains, and the `CNAME` record Vercel shows at your DNS.
-4. Once it is live, point the portfolio at it: in the portfolio's Vercel project set
-   `PARENTING_SITE_URL` to this site's address and redeploy. Its `/parenting` address then redirects here.
+4. The portfolio already links here and redirects its old `/parenting` address to this site.
 
 ## How it works
 
 Calm practice games for autistic children, installable on a phone as its own app ("Little Steps").
 No account, no timer, no score. Everything a child does (settings, rounds, stickers, name) stays in the
 browser's `localStorage`. The only things that reach the server are **anonymous counts** (see
-*Dashboard and privacy* below), which a parent can switch off, and a first name only if a parent
+*Counts and privacy* below), which a parent can switch off, and a first name only if a parent
 chooses to share it. The page says so, in the "For parents" note and the settings' Privacy section.
 
 ### The games
@@ -126,11 +124,12 @@ file that `scripts/test-thinking.mts` runs thousands of rounds of.
 Both are read defensively (`cleanProgress`, bounds checks), so a damaged entry cannot break the page.
 "Forget my child's details" and "Clear stickers and progress" are in the settings.
 
-### Dashboard and privacy (`/admin`)
+### Counts and privacy
 
-The dashboard at `/admin` shows who is on the games page now, the last 14 days (visits, visits that opened a
-game, rounds finished, minutes), a per-game breakdown, and any names parents chose to share. It refreshes
-every 30 seconds.
+The portfolio's Admin → Little Steps shows who is on the games page now, the last 14 days (visits, visits that
+opened a game, rounds finished, minutes), a per-game breakdown, and any names parents chose to share. That
+dashboard lives there, not here; this site only writes the counts. If the records or the list of games change,
+change `src/lib/parentingStats.ts` on the portfolio to match.
 
 What the page sends (`src/games/stats.ts`, to `POST /api/ping`):
 
@@ -140,13 +139,13 @@ What the page sends (`src/games/stats.ts`, to `POST /api/ping`):
 | round | a round is finished | the game |
 | forget | a parent switches sharing off | the random share id |
 
-What the server keeps (`src/lib/stats.ts`; the database is passed in, so it is testable):
+What the server keeps (`src/lib/stats.ts`):
 
 | Collection | Holds | Lifetime |
 |---|---|---|
 | `parenting_daily` | one document per India day, counters only | kept |
 | `parenting_live` | the fresh page-load id, the game and a time | TTL index, 15 minutes |
-| `parenting_shared` | a first name, an age group and counts, **only for a parent who switched sharing on** | removed when sharing is switched off, deletable from the admin, TTL one year |
+| `parenting_shared` | a first name, an age group and counts, **only for a parent who switched sharing on** | removed when sharing is switched off, deletable from the portfolio admin, TTL one year |
 
 There are no cookies, IP addresses, user agents or persistent ids. Counting is off for browsers that
 send Do Not Track or Global Privacy Control, when the parent switches it off (Settings → Privacy), and
@@ -173,8 +172,8 @@ src/games/
 └── thinking/ rounds.ts (catalogue, count, pattern, sort, odd, puzzle, dots)
 public/                       # manifest ("Little Steps"), service worker, icons, offline page
 scripts/make-icons.mjs        # regenerates the app icons
-src/lib/stats.ts               # what the server keeps and the dashboard reads
-src/app/api/ping · src/app/api/admin/dashboard · src/app/admin
+src/lib/stats.ts               # what the server keeps (the dashboard that reads it is on the portfolio)
+src/app/api/ping
 ```
 
 ### How tracing is judged (`trace/score.ts`)
@@ -232,8 +231,7 @@ node scripts/test-voice.mts      # which recorded message is picked: it exists, 
 node scripts/test-thinking.mts   # How Many?, patterns, Sort It, Odd One Out, Jigsaw and Connect the Dots: every round has one right answer
 node scripts/test-habits.mts     # the habit cards: unique, balanced rounds, and gentle wording (no "bad", "naughty"...)
 node scripts/test-progress.mts   # counting, stickers, weekly summary, damaged data
-node --env-file=.env.local scripts/test-stats.mts   # dashboard numbers and privacy promises,
-                                 # run against a throwaway database that is dropped afterwards
+node scripts/test-stats.mts      # pings are cleaned before they are kept; names are capped; India's day
 ```
 
 When a generated round is wrong, fix the generator, not the one instance.
