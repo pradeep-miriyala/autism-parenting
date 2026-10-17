@@ -71,7 +71,7 @@ await settle('install')
 await settle('activate')
 
 // ── What the page asks it to keep: the page itself, and every other page ──
-const PAGES = ['/', '/stickers', '/about', '/parents', '/parents/child', '/parents/progress', '/parents/settings', '/parents/voice',
+const PAGES = ['/', '/stickers', '/about', '/parents', '/parents/child', '/parents/progress', '/parents/settings', '/parents/voice', '/parents/pictures',
   '/parents/privacy', ...ALL_GAME_IDS.map(id => `/games/${id}`)]
 await settle('message', { data: { type: 'precache', urls: PAGES.map(p => ORIGIN + p) } })
 

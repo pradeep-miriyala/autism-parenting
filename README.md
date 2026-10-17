@@ -56,7 +56,7 @@ Every screen has its own address, so Back, reload and a shared link go where you
 | `/games/<id>` | One game (`/games/count`, `/games/spelling`...); built ahead of time for every id |
 | `/stickers` | The sticker album |
 | `/about` | What Little Steps is, in words for a parent. No links that lead off the site |
-| `/parents` · `/parents/child` · `progress` · `settings` · `voice` · `privacy` | Everything for grown-ups, behind a press-and-hold lock (`ParentGate`). Open for 15 minutes in that tab, then it closes |
+| `/parents` · `/parents/child` · `progress` · `settings` · `voice` · `pictures` · `privacy` | Everything for grown-ups, behind a press-and-hold lock (`ParentGate`). Open for 15 minutes in that tab, then it closes |
 
 A header runs across the top (`AppShell.tsx`): a back arrow, where you are (`nav.ts` is the one table of titles and
 "back" targets), the sticker count and a menu panel from the right. In a game it carries the blue ▶ for play mode
@@ -81,7 +81,7 @@ inside the game (`GameScreen.tsx`) carries the controls, so the game keeps the r
 | What Comes Next? | Picks the picture that carries a pattern on | A-B, then A-A-B / A-B-B, then A-B-C; coloured shapes, shapes, or drawings; 5 questions |
 | Sort It | Drags a picture to the right bin | By colour, shape, size or what it is; 2–3 bins, 4–8 things |
 | Odd One Out | Taps the one that is different | Another kind of thing (3 or 4 pictures), later a different colour, shape or size |
-| Jigsaw | Drags pieces onto a board that shows the picture faintly | 4, 6 or 9 pieces; every piece has a drawing of its own, so no two pieces look alike |
+| Jigsaw | Drags pieces onto a board that shows the picture faintly. With a parent's photo it is a free table: pieces lie loose and are moved anywhere (see *Your pictures*) | 4, 6, 9 or 12 pieces; in the drawn version every piece has a drawing of its own, so no two pieces look alike |
 | Helpful Habits | A card shows something a child does; drag it to "Helps me" or "Does not help me" (or tap the bucket) | 28 cards; 3–10 per round; right = sparkle and a sentence ("Brushing my teeth helps me."); wrong = buzz and the card slides back; no "good"/"bad" wording |
 
 The home screen groups the games (Numbers, Thinking, Letters and writing, Everyday life) in `GAME_GROUPS` and
@@ -129,6 +129,22 @@ file that `scripts/test-thinking.mts` runs thousands of rounds of.
   touch (`voice/player.ts`), which is more reliable on iPhones than an audio element. Safari can clear a site's saved
   data after about a week without a visit unless the page is installed, so the settings say to add it to the home
   screen. They are made and kept per device: record on the phone the child plays on.
+- **Your pictures.** In the parents' area (Your pictures) a parent adds up to 12 photos for the Jigsaw
+  (`PicturesSettings.tsx`). Each photo is made ready on the device (`pictures/prepare.ts`): turned the right way up,
+  cropped to 4 by 3 from the middle, shrunk to at most 1200 by 900 and saved again as a JPEG, which also drops
+  hidden details such as where the photo was taken. Photos are kept in IndexedDB on that device only
+  (`pictures/store.ts`), never uploaded, never counted, and the same Safari note as Your voice applies. The Jigsaw
+  then plays either a photo or a drawn picture each round: a parent chooses *my photos and the drawn pictures*
+  (about half each, never the same photo twice running), *only my photos*, or *only the drawn pictures*. With no
+  photos, or a browser that cannot keep them, it is the drawn pictures exactly as before.
+  - **How a photo is cut** (`pictures/cut.ts`, pure geometry). A grid of 4, 6, 9 or 12 pieces. Every inner edge gets
+    a random knob or hole (a different one each round); two neighbours share one curve, so they always fit and the
+    pieces add up to exactly the picture. A parent can switch to plain edges (straight cuts, no knobs).
+  - **How it plays** (`PhotoJigsaw.tsx`). The board is at the top and the loose pieces lie on a shelf under it, all in
+    one SVG. A child drags a piece anywhere. Let go near its place (about 40% of a piece away) and it clicks in with
+    the sparkle; let go anywhere else and it stays where it was dropped, with no buzz and no score. Tapping a piece,
+    then its place, works too. A faint copy of the photo on the board is on by default and can be switched off. The
+    usual hint pulses the place for the piece last touched.
 - **Stickers.** Each finished round earns one of 30 stickers, chosen at random, shown in an album the
   child can open. Nothing is ever taken away; an unfinished round earns nothing.
 - **Parent summary.** *For parents → This week*: rounds finished in the last 7 days (a small bar chart and a
@@ -193,6 +209,8 @@ src/games/
 ├── CountGame · PatternGame · SortGame · OddGame · PuzzleGame · DotsGame (.tsx) · Pic.tsx
 ├── gameDefs.ts · profile.ts · progress.ts · stats.ts (anonymous counts)
 ├── VoiceSettings.tsx · voice/ (store.ts IndexedDB, player.ts Web Audio, pick.ts which clip)
+├── PicturesSettings.tsx · JigsawGame.tsx (photo or drawn, each round) · PhotoJigsaw.tsx
+├── pictures/ cut.ts (the cut and the table) · prepare.ts (crop and shrink) · store.ts (IndexedDB) · prefs.ts (choices, next picture)
 ├── feedback.ts (voice, ding, buzz, chime) · sprinkles.tsx · useStuck.ts
 ├── HoldToUnlock.tsx · InfoButton.tsx · PwaInstall.tsx · icons.tsx
 ├── spot/   generate.ts (scenes + differences as data) · art.tsx (the SVG drawings)
@@ -263,6 +281,7 @@ node scripts/test-thinking.mts   # How Many?, patterns, Sort It, Odd One Out, Ji
 node scripts/test-habits.mts     # the habit cards: unique, balanced rounds, and gentle wording (no "bad", "naughty"...)
 node scripts/test-progress.mts   # counting, stickers, weekly summary, damaged data
 node scripts/test-stats.mts      # pings are cleaned before they are kept; names are capped; India's day
+node scripts/test-jigsaw.mts     # photo Jigsaw: every cut fits and adds up to the picture, knobs stay in their room, crops, next picture
 ```
 
 When a generated round is wrong, fix the generator, not the one instance.

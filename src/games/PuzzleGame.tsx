@@ -33,7 +33,7 @@ function Piece({ scene, index, cols, rows, faint }: { scene: PuzzleScene; index:
   )
 }
 
-export default function PuzzleGame({ level, sound, profile, sprinklesOn, hintSec, onActive, onDone }: {
+export default function PuzzleGame({ level, sound, profile, sprinklesOn, hintSec, onActive, onDone, onNext }: {
   level: number
   sound: boolean
   profile: Profile
@@ -41,6 +41,8 @@ export default function PuzzleGame({ level, sound, profile, sprinklesOn, hintSec
   hintSec: number
   onActive?: (active: boolean) => void
   onDone?: () => void
+  /** Asked for another picture. The Jigsaw screen then decides which kind comes next; alone, a new drawn one. */
+  onNext?: () => void
 }) {
   const { praise, chime, ding, buzz } = useFeedback(sound)
   const fx = useSprinkles()
@@ -194,8 +196,8 @@ export default function PuzzleGame({ level, sound, profile, sprinklesOn, hintSec
 
       <div className="sq-actions" style={{ marginTop: '.5rem', marginBottom: 0 }}>
         {done
-          ? <button className="sq-btn primary" onClick={newRound}>Another picture</button>
-          : <button className="sq-btn" onClick={newRound}>Other picture</button>}
+          ? <button className="sq-btn primary" onClick={onNext ?? newRound}>Another picture</button>
+          : <button className="sq-btn" onClick={onNext ?? newRound}>Other picture</button>}
       </div>
     </div>
   )

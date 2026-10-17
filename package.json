@@ -10,7 +10,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "test": "node scripts/test-spot.mts && node scripts/test-trace.mts && node scripts/test-progress.mts && node scripts/test-match.mts && node scripts/test-habits.mts && node scripts/test-voice.mts && node scripts/test-thinking.mts && node scripts/test-stats.mts",
+    "test": "node scripts/test-spot.mts && node scripts/test-trace.mts && node scripts/test-progress.mts && node scripts/test-match.mts && node scripts/test-habits.mts && node scripts/test-voice.mts && node scripts/test-thinking.mts && node scripts/test-stats.mts && node scripts/test-jigsaw.mts",
     "test:stats": "node scripts/test-stats.mts",
     "test:offline": "node scripts/test-offline.mts",
     "icons": "node scripts/make-icons.mjs"

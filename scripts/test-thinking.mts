@@ -114,22 +114,22 @@ for (let level = 1; level <= 3; level++) {
 }
 
 // ── Jigsaw ──
-for (let level = 1; level <= 3; level++) {
+for (let level = 1; level <= 4; level++) {
   for (let s = 1; s <= SEEDS; s++) {
     const p = makePuzzle(level, seeded(s * 47 + level)), n = p.cols * p.rows
     check(p.tray.length === n && [...p.tray].sort((a, b) => a - b).every((v, i) => v === i), `jigsaw level ${level}: every piece once`)
     check(p.tray.every((v, i) => v !== i), `jigsaw level ${level} seed ${s}: a piece already home`)
   }
 }
-check(makePuzzle(1).cols * makePuzzle(1).rows === 4 && makePuzzle(2).cols * makePuzzle(2).rows === 6 && makePuzzle(3).cols * makePuzzle(3).rows === 9, 'four, six and nine pieces')
+check(makePuzzle(1).cols * makePuzzle(1).rows === 4 && makePuzzle(2).cols * makePuzzle(2).rows === 6 && makePuzzle(3).cols * makePuzzle(3).rows === 9 && makePuzzle(4).cols * makePuzzle(4).rows === 12, 'four, six, nine and twelve pieces')
 {
   const boxes = Array.from({ length: 6 }, (_, i) => pieceBox(i, 3, 2, 300, 200))
   check(boxes[0].x === 0 && boxes[0].y === 0 && boxes[5].x === 200 && boxes[5].y === 100 && boxes.every(b => b.w === 100 && b.h === 100), 'piece boxes tile the picture')
 }
 
 // The jigsaw picture: every piece has a drawing of its own, so no two pieces look alike.
-for (let level = 1; level <= 3; level++) {
-  const { cols, rows } = { 1: { cols: 2, rows: 2 }, 2: { cols: 3, rows: 2 }, 3: { cols: 3, rows: 3 } }[level]!
+for (let level = 1; level <= 4; level++) {
+  const { cols, rows } = { 1: { cols: 2, rows: 2 }, 2: { cols: 3, rows: 2 }, 3: { cols: 3, rows: 3 }, 4: { cols: 4, rows: 3 } }[level]!
   for (let s = 1; s <= SEEDS; s++) {
     const sc = makePuzzleScene(cols, rows, 400, 300, seeded(s * 59 + level)), tag = `jigsaw picture level ${level} seed ${s}`
     check(sc.objs.length === cols * rows && new Set(sc.objs.map(o => o.kind)).size === sc.objs.length && sc.objs.every(o => hasArt(o.kind)), `${tag}: a different drawing in every cell`)

@@ -5,11 +5,11 @@ import { useEffect, useState } from 'react'
 import { PARENT_PAGES } from '../nav'
 import { summarise } from '../progress'
 import { useApp } from '../store'
-import { ChevronIcon, ChartIcon, GearIcon, MicIcon, ShieldIcon, UserIcon } from '../icons'
+import { ChevronIcon, ChartIcon, GearIcon, MicIcon, PictureIcon, ShieldIcon, UserIcon } from '../icons'
 
 const PORTFOLIO = process.env.NEXT_PUBLIC_PORTFOLIO_URL || 'https://pradeep.miriyala.in'
 const ICONS: Record<string, React.ReactNode> = {
-  child: <UserIcon />, progress: <ChartIcon />, settings: <GearIcon />, voice: <MicIcon />, privacy: <ShieldIcon />,
+  child: <UserIcon />, progress: <ChartIcon />, settings: <GearIcon />, voice: <MicIcon />, pictures: <PictureIcon />, privacy: <ShieldIcon />,
 }
 
 export default function ParentHub() {

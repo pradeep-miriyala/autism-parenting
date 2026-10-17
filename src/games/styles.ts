@@ -144,6 +144,23 @@ body:has(.sq-wrap.playmode){padding-top:.5rem}
 .pz-piece.dragging{transition:none;cursor:grabbing;z-index:5;box-shadow:0 10px 24px rgba(15,13,10,.24)}
 .pz-piece.sel{outline:3px solid var(--accent-3);outline-offset:1px}
 .pz-piece.shake{animation:sq-shake .4s ease-in-out,sq-flash .9s ease-out}
+/* Jigsaw with a photo: board and loose pieces in one drawing */
+.pj-stage{width:100%;max-width:520px;margin:.4rem auto .5rem}
+.pj-svg{display:block;width:100%;height:auto;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+.pj-table{fill:color-mix(in srgb,var(--accent) 6%,#fff)}
+.pj-shelf{fill:color-mix(in srgb,var(--accent) 9%,#fff);stroke:var(--line);stroke-width:1.5;stroke-dasharray:6 6}
+.pj-board{fill:#fff;stroke:var(--line);stroke-width:2}
+.pj-cut{fill:none;stroke:var(--line);stroke-width:1.2}
+.pj-cell{fill:transparent}
+.pj-near{fill:color-mix(in srgb,var(--accent) 22%,transparent);stroke:var(--accent);stroke-width:2.5}
+.pj-hint{fill:color-mix(in srgb,var(--accent) 18%,transparent);stroke:var(--accent);stroke-width:2.5;animation:sp-pulse 1.4s ease-in-out infinite}
+.pj-piece{cursor:grab;touch-action:none}
+.pj-piece.lifted{cursor:grabbing}
+.pj-piece.placed{pointer-events:none}
+.pj-shadow{fill:rgba(15,13,10,.22);pointer-events:none}
+.pj-edge{fill:transparent;stroke:rgba(15,13,10,.4);stroke-width:1.2;transition:stroke-opacity .8s}
+.pj-piece.sel .pj-edge{stroke:var(--accent-3);stroke-width:3.5;stroke-opacity:1}
+.pj-done .pj-edge{stroke-opacity:0}
 .dt-board{background:#fff;border:1px solid var(--line);margin:.5rem 0}
 .dt-board svg{display:block;width:100%;height:auto;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 .dt-dot{cursor:pointer}
@@ -152,6 +169,7 @@ body:has(.sq-wrap.playmode){padding-top:.5rem}
 .dt-fill{animation:dt-in .6s ease-out}
 @keyframes dt-in{from{fill-opacity:0}to{fill-opacity:.6}}
 @media (prefers-reduced-motion:reduce){
+  .pj-hint{animation:none}
   .th-num.hint,.th-choice.hint,.so-bin.hint,.pz-slot.hint{animation:none;box-shadow:0 0 0 4px color-mix(in srgb,var(--accent) 25%,transparent)}
   .th-num.shake,.th-choice.shake,.so-card.shake,.pz-piece.shake{animation:sq-flash .9s ease-out}
   .dt-dot.hint circle:nth-of-type(2){animation:none}.dt-dot.shake{animation:none}.dt-fill{animation:none}
@@ -198,6 +216,13 @@ body:has(.sq-wrap.playmode){padding-top:.5rem}
 .vc-actions{display:flex;flex-wrap:wrap;gap:.35rem}
 .vc-actions .sq-btn{padding:.5rem .7rem;font-size:.6rem}
 .vc-error{color:#9A4A12}
+.pc-add{display:flex;flex-wrap:wrap;align-items:center;gap:.5rem .8rem;margin:.4rem 0 .6rem}
+.pc-count{margin:0}
+.pc-grid{list-style:none;margin:.4rem 0 .8rem;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:.6rem}
+.pc-item{display:grid;gap:.4rem;padding:.4rem;border:1px solid var(--line);background:#fff}
+.pc-item img,.pc-blank{display:block;width:100%;aspect-ratio:4 / 3;object-fit:cover;background:var(--line)}
+.pc-item .sq-btn{padding:.5rem .7rem;font-size:.6rem}
+.pc-choices{display:grid;gap:.1rem;margin:.2rem 0 .5rem}
 .sq-subhead{font-family:var(--f-display);font-size:1.05rem;font-weight:600;margin:.2rem 0 .1rem;color:var(--ink)}
 .sq-bars{display:flex;gap:.4rem;align-items:flex-end;height:112px;margin:.5rem 0 .3rem;padding:1rem .2rem 0}
 .sq-bar{flex:1;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:.15rem;min-width:0}
@@ -399,6 +424,7 @@ body:has(.sq-wrap.playmode){padding-top:.5rem}
   .sq-wrap.puzzle .sq-top{grid-column:2;grid-row:1}
   .sq-wrap.puzzle .pz-board{grid-column:1;grid-row:1 / span 4;margin:0 auto;max-width:none;width:min(100%, calc((100svh - 76px) * 1.333))}
   .sq-wrap.puzzle .pz-tray{grid-column:2;grid-row:2;margin:0 auto;max-width:none;width:78%;gap:.3rem}
+  .sq-wrap.puzzle .pj-stage{grid-column:1;grid-row:1 / span 4;margin:0 auto;max-width:none;width:min(100%, calc((100svh - 76px) * var(--pj-ratio, 1)))}
   .sq-wrap.puzzle .sp-dots{display:none}
   .sq-wrap.puzzle .sq-top{justify-content:flex-end}
   .sq-wrap.puzzle .sq-msg{grid-column:2;grid-row:3}

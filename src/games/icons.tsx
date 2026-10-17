@@ -116,6 +116,10 @@ export function ChartIcon() {
   return <svg {...stroke}><path d="M5 20V10M12 20V4M19 20v-7" /></svg>
 }
 
+export function PictureIcon() {
+  return <svg {...stroke}><rect x="3" y="4" width="18" height="16" rx="2" /><circle cx="9" cy="10" r="1.6" /><path d="m4 18 5-5 4 4 3-3 4 4" /></svg>
+}
+
 export function MicIcon() {
   return <svg {...stroke}><rect x="9" y="3" width="6" height="11" rx="3" /><path d="M5 11a7 7 0 0 0 14 0M12 18v3" /></svg>
 }

@@ -10,6 +10,7 @@ import { WORD_SETS, type MatchSet } from './match/generate'
 import { allCharacters, type LetterCase } from './trace/letters'
 import type { TraceMode } from './TraceGame'
 import { ageBand, forgetShared, newShareId, useStats } from './stats'
+import { DEFAULT_JIGSAW, cleanJigsaw, type JigsawPrefs } from './pictures/prefs'
 import { setEnabled as setRecordingsEnabled, loadClips, unlockOnGesture } from './voice/player'
 import { EMPTY_PROGRESS, cleanProgress, recordRound, type GameKey, type Progress } from './progress'
 import { AGES, COLOURS, EMPTY_PROFILE, cleanName, startingLengths, type ColourId, type Profile } from './profile'
@@ -31,6 +32,7 @@ export type Store = {
   lengths: Record<GameId, number>; changeLength: (id: GameId, n: number) => void
   traceMode: TraceMode; setTraceMode: (m: TraceMode) => void
   useRecordings: boolean; setUseRecordings: (v: boolean) => void
+  jigsaw: JigsawPrefs; setJigsaw: (patch: Partial<JigsawPrefs>) => void
   // what each game remembers
   spotTheme: ThemeId; setSpotTheme: (t: ThemeId) => void
   matchSet: MatchSet; setMatchSet: (s: MatchSet) => void
@@ -93,6 +95,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [shareName, setShareName] = useState(false)
   const [shareId, setShareId] = useState('')
   const [useRecordings, setUseRecordings] = useState(true)
+  const [jigsaw, setJigsawState] = useState<JigsawPrefs>(DEFAULT_JIGSAW)
   const [roundActive, setRoundActive] = useState(false)
   const [progress, setProgress] = useState<Progress>(EMPTY_PROGRESS)
   const progressRef = useRef<Progress>(EMPTY_PROGRESS)
@@ -131,6 +134,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       if (s.playMode === true) setPlayMode(true)
       if (typeof s.shareCounts === 'boolean') setShareCounts(s.shareCounts)
       if (typeof s.useRecordings === 'boolean') setUseRecordings(s.useRecordings)
+      setJigsawState(cleanJigsaw(s.jigsaw))
       if (s.shareName === true && typeof s.shareId === 'string' && /^[A-Za-z0-9_-]{12,40}$/.test(s.shareId)) { setShareName(true); setShareId(s.shareId) }
       if (HINT_CHOICES.includes(s.hintSec)) setHintSec(s.hintSec)
       const pr = s.profile
@@ -169,10 +173,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       localStorage.setItem(STORE, JSON.stringify({
         game: lastGame, wordType, spotTheme, matchSet, letterPos, traceMode, letterCase, lengths, sound,
         sprinkles: sprinklesOn, hintSec, profile, setupSeen, playMode, shareCounts, shareName,
-        shareId: shareName ? shareId : '', useRecordings,
+        shareId: shareName ? shareId : '', useRecordings, jigsaw,
       }))
     } catch {}
-  }, [lastGame, wordType, spotTheme, matchSet, letterPos, traceMode, letterCase, lengths, sound, sprinklesOn, hintSec, profile, setupSeen, playMode, shareCounts, shareName, shareId, useRecordings])
+  }, [lastGame, wordType, spotTheme, matchSet, letterPos, traceMode, letterCase, lengths, sound, sprinklesOn, hintSec, profile, setupSeen, playMode, shareCounts, shareName, shareId, useRecordings, jigsaw])
 
   // The recordings are read at start-up, and the audio engine is woken by the first touch.
   useEffect(() => { unlockOnGesture(); loadClips() }, [])
@@ -257,6 +261,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setProfile(p => ({ ...p, age: age as Profile['age'] }))
     if (first) setLengths(startingLengths(age!))
   }, [profile.age])
+  const setJigsaw = useCallback((patch: Partial<JigsawPrefs>) => setJigsawState(j => ({ ...j, ...patch })), [])
   const changeLength = useCallback((id: GameId, n: number) => setLengths(l => ({ ...l, [id]: n })), [])
 
   // ── Sharing the name is a parent's choice, and undoing it deletes what was shared ──
@@ -289,14 +294,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const value = useMemo<Store>(() => ({
     ready, sound, setSound, sprinklesOn, setSprinklesOn, hintSec, setHintSec, lengths, changeLength, traceMode, setTraceMode,
-    useRecordings, setUseRecordings, spotTheme, setSpotTheme, matchSet, setMatchSet, letterCase, setLetterCase, wordType, setWordType,
+    useRecordings, setUseRecordings, jigsaw, setJigsaw, spotTheme, setSpotTheme, matchSet, setMatchSet, letterCase, setLetterCase, wordType, setWordType,
     letterPos, rememberLetter, restartLetterOrder, profile, editProfile, chooseAge, forgetChild,
     setupSeen, markSetupSeen: () => setSetupSeen(true),
     shareCounts, changeCounting, shareName, shareId, startSharing, stopSharing,
     progress, finishRound, clearProgress, newSticker, dismissSticker,
     playMode, setPlayMode, lastGame, setLastGame, roundActive, setRoundActive,
     compact, toggleRotate, toast, showToast,
-  }), [ready, sound, sprinklesOn, hintSec, lengths, changeLength, traceMode, useRecordings, spotTheme, matchSet, letterCase, wordType,
+  }), [ready, sound, sprinklesOn, hintSec, lengths, changeLength, traceMode, useRecordings, jigsaw, setJigsaw, spotTheme, matchSet, letterCase, wordType,
     letterPos, rememberLetter, restartLetterOrder, profile, editProfile, chooseAge, forgetChild, setupSeen,
     shareCounts, changeCounting, shareName, shareId, startSharing, stopSharing, progress, finishRound, clearProgress,
     newSticker, dismissSticker, playMode, lastGame, roundActive, compact, toggleRotate, toast, showToast])
