@@ -3,6 +3,10 @@
 import type { Metadata, Viewport } from 'next'
 import { Analytics } from '@vercel/analytics/react'
 import './globals.css'
+import { PARENTING_CSS } from '@/games/styles'
+import { SHELL_CSS } from '@/games/shellStyles'
+import { AppProvider } from '@/games/store'
+import AppShell from '@/games/AppShell'
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'),
@@ -44,7 +48,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body>
-        {children}
+        <style dangerouslySetInnerHTML={{ __html: PARENTING_CSS + SHELL_CSS }} />
+        <AppProvider>
+          <AppShell>{children}</AppShell>
+        </AppProvider>
         <Analytics />
       </body>
     </html>

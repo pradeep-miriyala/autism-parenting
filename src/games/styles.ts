@@ -1,11 +1,5 @@
 // Calm palette: soft colours, no red, no flashing, motion only when the user allows it.
 export const PARENTING_CSS = `
-/* What a parent reads lives inside the "For parents" section. */
-.sq-ph{margin:.25rem 0 1rem;padding-bottom:1rem;border-bottom:1px solid var(--line)}
-.sq-ph .eyebrow{display:block;margin-bottom:.5rem}
-.sq-ph-title{font-family:var(--f-display);font-weight:600;font-size:1.7rem;line-height:1.15;letter-spacing:-.01em;color:var(--ink);margin:0 0 .4rem}
-.sq-ph-dek{font-family:var(--f-body);font-size:1rem;line-height:1.5;color:var(--ink-60);margin:0 0 .8rem}
-.sq-ph-text{font-family:var(--f-body);font-size:.92rem;line-height:1.7;color:var(--ink-60);margin:0}
 .sq-wrap{max-width:420px;margin:0 auto;padding:1rem var(--px) 3rem}
 .sq-tabs,.sq-types{display:flex;gap:.4rem}
 /* Only the chosen tab spells out its name; the others fold down to just an icon. */
@@ -38,41 +32,28 @@ export const PARENTING_CSS = `
 .sq-info.on{color:var(--accent);border-color:var(--accent)}
 .sq-bubble{position:absolute;right:.75rem;top:3.6rem;z-index:3;max-width:min(80%,320px);background:var(--ink);color:var(--bg);
   padding:.7rem .9rem;font-family:var(--f-ui);font-size:.82rem;line-height:1.5;box-shadow:0 8px 24px rgba(15,13,10,.25)}
-.sq-toprow .sq-rotate,.sq-nav .sq-rotate-nav,.sq-nav .sq-gear-nav,.sq-nav .sq-album-nav,.sq-nav .sq-play-nav{display:none}
-.sq-toprow{display:flex;gap:.5rem;align-items:center;margin-bottom:.75rem}
-.sq-parent-bar{flex:1;min-width:0;min-height:44px;display:flex;align-items:center;gap:.5rem;padding:.5rem 1rem;border:1px solid var(--line);
-  background:rgba(245,243,239,0.6);font-family:var(--f-ui);font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-60);
-  cursor:pointer;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.sq-parent-bar:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.sq-nav .sq-rotate-nav,.sq-nav .sq-gear-nav,.sq-nav .sq-album-nav,.sq-nav .sq-play-nav{display:none}
 .sq-dialog{border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:1.1rem 1.25rem 1.25rem;width:min(92vw,460px);
   max-height:calc(100svh - 24px);overflow:auto;margin:auto;font-family:var(--f-ui);font-size:.8rem;color:var(--ink-60);box-shadow:0 20px 50px rgba(15,13,10,.3)}
 .sq-dialog::backdrop{background:rgba(22,19,15,.5)}
-.sq-dialog-head{display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-bottom:.6rem}
-.sq-dialog-head h2{font-family:var(--f-display);font-size:1.3rem;font-weight:600;margin:0}
 .sq-len{flex-wrap:wrap;gap:.35rem .75rem}
 .sq-len > span{flex:1 0 100%;font-size:.78rem;color:var(--ink)}
 .sq-len input[type=range]{flex:1 0 100%}
 .sq-len small{flex:1 0 100%;font-size:.7rem;color:var(--ink-50)}
 .sq-toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(1rem + env(safe-area-inset-bottom));z-index:95;background:var(--ink);color:var(--bg);
   padding:.7rem 1rem;font-family:var(--f-ui);font-size:.78rem;line-height:1.4;max-width:90vw;text-align:center;box-shadow:0 8px 24px rgba(15,13,10,.25)}
-@media (pointer:coarse) and (max-width:900px){.sq-toprow .sq-rotate{display:grid}}
 /* Play mode: just the game, and a lock that only a long press opens. */
 .sq-icon.sq-play{background:var(--accent);border-color:var(--accent);color:#fff}
 .sq-icon.sq-play.faded{opacity:.45}
 .sq-icon.sq-play:focus-visible{outline-color:var(--accent-3)}
 /* No pull-down-to-refresh while a game is open: see Games.tsx. */
 html.sq-nopull, html.sq-nopull body{overscroll-behavior-y:none}
-.sq-playbar{display:flex;gap:.5rem;justify-content:flex-end;align-items:center;margin-bottom:.75rem}
-.sq-playbar .sq-rotate{display:none}
-@media (pointer:coarse) and (max-width:900px){.sq-playbar .sq-rotate{display:grid}}
 .sq-lock{position:relative;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
 .sq-lock-ring{position:absolute;inset:-1px;width:calc(100% + 2px);height:calc(100% + 2px);transform:rotate(-90deg);pointer-events:none}
 .sq-lock-ring circle{stroke:var(--accent);stroke-dasharray:125.7;stroke-dashoffset:125.7;stroke-linecap:round}
 .sq-lock.holding{color:var(--accent);border-color:var(--accent)}
 .sq-lock.holding .sq-lock-ring circle{stroke-dashoffset:0;transition:stroke-dashoffset 2.5s linear}
-body:has(.sq-wrap.playmode) .page-head, body:has(.sq-wrap.playmode) .sq-intro, body:has(.sq-wrap.playmode) footer,
-body:has(.sq-wrap.playmode) .nav, body:has(.sq-wrap.playmode) .pr-install,
-body:has(.sq-wrap.playmode) .sq-more, body:has(.sq-wrap.playmode) .sq-footwrap{display:none}
+body:has(.sq-wrap.playmode) .pr-install{display:none}
 body:has(.sq-wrap.playmode){padding-top:.5rem}
 .sq-playbox{margin-bottom:.2rem}
 .sq-home-groups{display:grid;gap:1.4rem}
@@ -224,7 +205,6 @@ body:has(.sq-wrap.playmode){padding-top:.5rem}
 .sq-barfill{width:100%;max-width:26px;background:var(--accent);opacity:.75;min-height:2px;flex:none}
 .sq-bard{font-size:.6rem;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-50)}
 .sq-confirm-row{display:flex;gap:.5rem;flex-wrap:wrap;margin:.4rem 0}
-.sq-album{width:min(92vw,420px)}
 .sq-stickers{list-style:none;margin:.4rem 0 0;padding:0;display:grid;grid-template-columns:repeat(5,1fr);gap:.5rem}
 .sq-stickers li{aspect-ratio:1;display:grid;place-items:center;font-size:1.9rem;line-height:1;border-radius:50%;
   border:1px solid var(--line);background:#fff}
@@ -318,16 +298,6 @@ body:has(.sq-wrap.playmode){padding-top:.5rem}
 @media (max-width:420px){.pr-install{gap:.6rem;padding:.75rem}.pr-install-text strong{font-size:.8rem}.pr-install-text span{font-size:.72rem}}
 
 
-/* The footer, folded away until someone scrolls past the end on purpose. */
-.sq-more{max-width:420px;margin:0 auto;padding:0 var(--px) 6.5rem;text-align:center}  /* room to clear the install pill */
-.sq-more button{min-height:44px;padding:.5rem 1rem;border:none;background:none;cursor:pointer;
-  font-family:var(--f-ui);font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-50)}
-.sq-more button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
-.sq-less{padding-bottom:.5rem}
-.sq-footwrap{display:grid;grid-template-rows:0fr;transition:grid-template-rows .5s ease}
-.sq-footwrap.open{grid-template-rows:1fr}
-.sq-footwrap > div{overflow:hidden;min-height:0}
-@media (prefers-reduced-motion:reduce){.sq-footwrap{transition:none}}
 
 /* Trace the Lines: the picture to follow, and the board to draw on. */
 .tr-canvas{display:block;width:100%;height:auto;aspect-ratio:4/3;touch-action:none;cursor:crosshair;background:#FBF9F5}
@@ -381,9 +351,7 @@ body:has(.sq-wrap.playmode){padding-top:.5rem}
 @media (orientation:landscape) and (max-height:520px){
   /* A phone held sideways: the page furniture steps aside for every game, and the
      portrait icon (top left) is the way back. */
-  body:has(.sq-wrap) .page-head, body:has(.sq-wrap) .sq-intro, body:has(.sq-wrap) footer,
-  body:has(.sq-wrap) .nav, body:has(.sq-wrap) .pr-install, body:has(.sq-wrap) .sq-toprow, body:has(.sq-wrap) .sq-setup,
-  body:has(.sq-wrap) .sq-more, body:has(.sq-wrap) .sq-footwrap{display:none}
+  body:has(.sq-wrap) .pr-install{display:none}
   body:has(.sq-wrap){padding-top:0}
   .sq-wrap, .sq-wrap.spot, .sq-wrap.trace, .sq-wrap.spelling, .sq-wrap.numbers{max-width:none;padding:.25rem max(1rem,env(safe-area-inset-left)) .25rem max(1rem,env(safe-area-inset-right))}
   .sq-nav{display:flex;gap:.4rem;margin-bottom:.25rem;align-items:stretch}

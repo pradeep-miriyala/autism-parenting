@@ -15,6 +15,7 @@ cp .env.local.example .env.local     # fill in; see below
 npm run dev                          # http://localhost:3000
 npm test                             # every round of every game, thousands of generated cases
 npm run test:stats                   # that the counts are cleaned before they are kept
+npm run build && npm run test:offline   # every page and file works with no connection
 ```
 
 The games need nothing but the code. The database is only for the anonymous counts: without it the games
@@ -43,7 +44,27 @@ Calm practice games for autistic children, installable on a phone as its own app
 No account, no timer, no score. Everything a child does (settings, rounds, stickers, name) stays in the
 browser's `localStorage`. The only things that reach the server are **anonymous counts** (see
 *Counts and privacy* below), which a parent can switch off, and a first name only if a parent
-chooses to share it. The page says so, in the "For parents" note and the settings' Privacy section.
+chooses to share it. The site says so on its About page and in the parents' Privacy page.
+
+### Screens and addresses
+
+Every screen has its own address, so Back, reload and a shared link go where you would expect.
+
+| Address | What it is |
+|---|---|
+| `/` | The games, in groups; each tile is a link |
+| `/games/<id>` | One game (`/games/count`, `/games/spelling`...); built ahead of time for every id |
+| `/stickers` | The sticker album |
+| `/about` | What Little Steps is, in words for a parent. No links that lead off the site |
+| `/parents` · `/parents/child` · `progress` · `settings` · `voice` · `privacy` | Everything for grown-ups, behind a press-and-hold lock (`ParentGate`). Open for 15 minutes in that tab, then it closes |
+
+A header runs across the top (`AppShell.tsx`): a back arrow, where you are (`nav.ts` is the one table of titles and
+"back" targets), the sticker count and a menu panel from the right. In a game it carries the blue ▶ for play mode
+instead of the stickers. The menu has the games, stickers, a sound switch, and, under "For grown-ups", the parents'
+area and About. Anything that leads off the site (the author, GitHub, Share) is only inside the parents' area.
+Settings, the child's details and progress are shared by every screen through one provider (`store.tsx`) that reads
+and writes the same two `localStorage` keys as before. On a phone held sideways the header steps aside and a slim bar
+inside the game (`GameScreen.tsx`) carries the controls, so the game keeps the room.
 
 ### The games
 
@@ -65,8 +86,8 @@ chooses to share it. The page says so, in the "For parents" note and the setting
 
 The home screen groups the games (Numbers, Thinking, Letters and writing, Everyday life) in `GAME_GROUPS` and
 `GAME_TILES` (`gameDefs.ts`). **Adding a game** is: its id in `ALL_GAME_IDS`, one entry in `GAME_SETTINGS` (the slider
-and its limits), one in `GAME_TILES` (title, group, icon), its screen in `Games.tsx`, and its key in `progress.ts` and
-`lib/stats.ts`. The thinking games' content and rounds live in `thinking/rounds.ts`, one dependency-free
+and its limits), one in `GAME_TILES` (title, group, icon), its screen in `GameScreen.tsx`, and its key in `progress.ts` and
+`lib/stats.ts`. The service worker's page list comes from `ALL_GAME_IDS`, so it needs nothing. The thinking games' content and rounds live in `thinking/rounds.ts`, one dependency-free
 file that `scripts/test-thinking.mts` runs thousands of rounds of.
 
 ### How it behaves
@@ -85,18 +106,20 @@ file that `scripts/test-thinking.mts` runs thousands of rounds of.
   the CSS. Scrolling up, the settings dialogs and the tiles are unaffected.
 - **Hints, not hurry.** After a pause (parent-set, default 10 s) or two misses in a row, the next
   right answer gently pulses (`useStuck.ts`).
-- **Play mode.** A parent opens a game and taps the round blue ▶ button at the end of the top row (on the tiles it
-  only explains this). Only the game stays on screen:
-  no games menu, no settings, no site navigation. Leaving needs a press-and-hold of the lock for about
-  2.5 seconds; the lock sits exactly where the ▶ button was. It survives a reload, and the Back button does nothing while it is on.
+- **Play mode.** A parent opens a game and taps the round blue ▶ button in the header. Only the game stays on
+  screen: no header, no menu, no site navigation. Leaving needs a press-and-hold of the lock for about
+  2.5 seconds. It survives a reload, and any other address (the Back button, a typed one) sends the child straight
+  back to the game they were in.
 - **Works offline.** Everything runs on the device, and a small service worker (`public/sw.js`,
-  scoped to the whole site but answering only the home page, never the dashboard or the API) keeps the page, its scripts, the icons and the fonts. One visit is enough:
-  the page hands the worker its own file list once it has loaded (`PwaInstall.tsx`), because on a first
-  visit the worker starts too late to see them. The installed app's launch address (`?src=pwa`) falls
-  back to the saved page. Spoken praise uses the phone's own voices, so some Android voices may stay
+  scoped to the whole site, answering only the app's own pages and never the API) keeps every page, its scripts, the icons and the fonts. One visit is enough:
+  the page hands the worker the list of pages and its own files once it has loaded (`PwaInstall.tsx`; the pages
+  again about once a week), because on a first visit the worker starts too late to see them. The worker saves each
+  page and reads the scripts out of it. Pages are network first, so a visit with a connection is always current.
+  The installed app's launch address (`?src=pwa`) is the same saved page. `scripts/test-offline.mts` checks all of
+  this against the built site. Spoken praise uses the phone's own voices, so some Android voices may stay
   quiet offline; the sparkle, buzz and chime are generated in the browser and always work. Bump `VERSION`
   in `sw.js` to force every phone to drop its saved copy.
-- **Your voice.** In the gear settings a parent can record up to three congratulations ("Well done! I am so proud of
+- **Your voice.** In the parents' area (Your voice) a parent can record up to three congratulations ("Well done! I am so proud of
   you.", the child's name if they like), up to 8 seconds each (`VoiceSettings.tsx`). At the end of a round one is
   played in place of the computer voice, chosen at random and never the same twice in a row; with none recorded
   (or "Play my recordings" off, or a clip that cannot be played) the computer voice is used exactly as before.
@@ -108,9 +131,9 @@ file that `scripts/test-thinking.mts` runs thousands of rounds of.
   screen. They are made and kept per device: record on the phone the child plays on.
 - **Stickers.** Each finished round earns one of 30 stickers, chosen at random, shown in an album the
   child can open. Nothing is ever taken away; an unfinished round earns nothing.
-- **Parent summary.** *Gear → This week*: rounds finished in the last 7 days (a small bar chart and a
+- **Parent summary.** *For parents → This week*: rounds finished in the last 7 days (a small bar chart and a
   per-game count), stickers and the all-time total. Finished rounds are counted, never scored.
-- **Settings (the gear).** Sound, round length per game, tracing steps, hint delay, sprinkles, and the
+- **Settings (For parents).** Sound, round length per game, tracing steps, hint delay, sprinkles, and the
   child's name / age / favourite colour (used for praise and the sprinkle colours). Setting the age
   suggests starting lengths once; the game never changes them again by itself.
 
@@ -158,13 +181,16 @@ memory (the address is never stored).
 ```
 src/games/
 ├── styles.ts                           # all the games' CSS (one template string)
-├── Games.tsx                           # tile home, settings, play mode, album, key games
+├── store.tsx                           # settings, child, progress, play mode: shared by every screen
+├── AppShell.tsx · nav.ts · shellContext.ts · shellStyles.ts   # header, menu, play bar; addresses and titles
+├── HomeScreen.tsx · GameScreen.tsx · KeyGame.tsx · StickerBook.tsx · ParentGate.tsx
+├── parents/                            # ParentHub, ChildForm, ProgressView, SettingsForm, PrivacyForm, VoicePage
 ├── SpotGame.tsx · TraceGame.tsx · MatchGame.tsx · HabitsGame.tsx
 ├── CountGame · PatternGame · SortGame · OddGame · PuzzleGame · DotsGame (.tsx) · Pic.tsx
 ├── gameDefs.ts · profile.ts · progress.ts · stats.ts (anonymous counts)
 ├── VoiceSettings.tsx · voice/ (store.ts IndexedDB, player.ts Web Audio, pick.ts which clip)
 ├── feedback.ts (voice, ding, buzz, chime) · sprinkles.tsx · useStuck.ts
-├── HoldToUnlock.tsx · InfoButton.tsx · PwaInstall.tsx · CollapsibleFooter.tsx · icons.tsx
+├── HoldToUnlock.tsx · InfoButton.tsx · PwaInstall.tsx · icons.tsx
 ├── spot/   generate.ts (scenes + differences as data) · art.tsx (the SVG drawings)
 ├── trace/  shapes.ts (27 line shapes) · letters.ts (A–Z, a–z, 0–9 as strokes) · score.ts (the judge)
 ├── match/  generate.ts (a round: objects, capital/small letters or words to pictures, shuffled, none on the same row)
@@ -174,6 +200,7 @@ public/                       # manifest ("Little Steps"), service worker, icons
 scripts/make-icons.mjs        # regenerates the app icons
 src/lib/stats.ts               # what the server keeps (the dashboard that reads it is on the portfolio)
 src/app/api/ping
+src/app/ (page.tsx, games/[game], stickers, about, parents/*: thin pages that render the screens above)
 ```
 
 ### How tracing is judged (`trace/score.ts`)
@@ -242,5 +269,5 @@ When a generated round is wrong, fix the generator, not the one instance.
 - **A picture theme or object:** add the drawing to `spot/art.tsx` and list it under a theme in
   `spot/generate.ts`; Spot the Differences and Matching Objects both use it.
 - **A habit card:** add it to `habits/data.ts` (a phrase that reads both as "... helps me" and "... does not help me"); the test checks the wording.
-- **A game:** add its id to `gameDefs.ts` (`GameId`, `GAME_TILES`), a length row in `Games.tsx`, and a
+- **A game:** add its id to `gameDefs.ts` (`GameId`, `GAME_TILES`), its screen in `GameScreen.tsx`, a length row in `GAME_SETTINGS`, and a
   key in `progress.ts` so its rounds are counted.

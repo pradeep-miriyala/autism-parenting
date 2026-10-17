@@ -77,3 +77,45 @@ export function PlayIcon() {
     </svg>
   )
 }
+
+const stroke = { width: 22, height: 22, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 2, strokeLinecap: 'round', strokeLinejoin: 'round', 'aria-hidden': true } as const
+
+export function MenuIcon() {
+  return <svg {...stroke}><path d="M4 7h16M4 12h16M4 17h16" /></svg>
+}
+
+export function BackIcon() {
+  return <svg {...stroke}><path d="M15 5l-7 7 7 7" /></svg>
+}
+
+export function CloseIcon() {
+  return <svg {...stroke}><path d="M6 6l12 12M18 6L6 18" /></svg>
+}
+
+export function HomeIcon() {
+  return <svg {...stroke}><path d="M4 11l8-7 8 7" /><path d="M6 10v10h12V10" /></svg>
+}
+
+export function ChevronIcon() {
+  return <svg {...stroke} width={16} height={16}><path d="M9 6l6 6-6 6" /></svg>
+}
+
+export function ShareIcon() {
+  return <svg {...stroke}><path d="M12 15V4" /><path d="M8 8l4-4 4 4" /><path d="M5 13v6h14v-6" /></svg>
+}
+
+export function ShieldIcon() {
+  return <svg {...stroke}><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6l7-3z" /></svg>
+}
+
+export function UserIcon() {
+  return <svg {...stroke}><circle cx="12" cy="8" r="4" /><path d="M4 21c0-4 3.6-6 8-6s8 2 8 6" /></svg>
+}
+
+export function ChartIcon() {
+  return <svg {...stroke}><path d="M5 20V10M12 20V4M19 20v-7" /></svg>
+}
+
+export function MicIcon() {
+  return <svg {...stroke}><rect x="9" y="3" width="6" height="11" rx="3" /><path d="M5 11a7 7 0 0 0 14 0M12 18v3" /></svg>
+}

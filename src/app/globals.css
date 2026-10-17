@@ -46,20 +46,3 @@ button, input, select, textarea { font-family: var(--f-ui); }
   font-size: 0.66rem; letter-spacing: 0.22em; text-transform: uppercase;
   color: var(--accent);
 }
-
-/* The bar across the top, and the footer. Both step aside while a game is open (see games/styles.ts). */
-.nav {
-  display: flex; align-items: center; justify-content: space-between; gap: 1rem;
-  min-height: var(--nav-h); padding: 0 var(--px); border-bottom: 1px solid var(--line);
-  background: var(--bg);
-}
-.nav-brand { font-family: var(--f-display); font-weight: 600; font-size: 1.15rem; color: var(--ink); }
-.nav-by { font-size: 0.72rem; letter-spacing: 0.08em; color: var(--ink-50); }
-.nav-by:hover, .nav-by:focus-visible { color: var(--accent); }
-
-.footer { padding: 2.5rem var(--px) 3rem; border-top: 1px solid var(--line); background: var(--surface); }
-.footer-inner { max-width: 640px; margin: 0 auto; display: grid; gap: 0.9rem; }
-.footer p { font-size: 0.82rem; line-height: 1.65; color: var(--ink-70); }
-.footer-links { display: flex; gap: 1.2rem; flex-wrap: wrap; font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; }
-.footer-links a { color: var(--ink-50); }
-.footer-links a:hover, .footer-links a:focus-visible { color: var(--accent); }
