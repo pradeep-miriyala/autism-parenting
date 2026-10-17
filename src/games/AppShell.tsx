@@ -15,7 +15,7 @@ import { ShellCtx } from './shellContext'
 import HoldToUnlock from './HoldToUnlock'
 import PwaInstall from './PwaInstall'
 import GatedAnalytics from './GatedAnalytics'
-import { AlbumIcon, BackIcon, ChevronIcon, CloseIcon, HomeIcon, InfoIcon, LandscapeIcon, LockIcon, MenuIcon, PlayIcon, PortraitIcon, SpeakerIcon } from './icons'
+import { AlbumIcon, BackIcon, ChevronIcon, CloseIcon, CopyrightIcon, HomeIcon, InfoIcon, LandscapeIcon, LockIcon, MenuIcon, PlayIcon, PortraitIcon, SpeakerIcon } from './icons'
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const app = useApp()
@@ -161,6 +161,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
           <ul className="ls-menu-list" onClick={e => { if ((e.target as HTMLElement).closest('a')) closeMenu() }}>
             <li><Link href="/parents" aria-current={pathname.startsWith('/parents') ? 'page' : undefined}><LockIcon /><span>For parents</span><small>Press and hold</small></Link></li>
             <li><Link href="/about" aria-current={pathname === '/about' ? 'page' : undefined}><InfoIcon /><span>About Little Steps</span></Link></li>
+            <li><Link href="/copyright" aria-current={pathname === '/copyright' ? 'page' : undefined}><CopyrightIcon /><span>Copyright</span></Link></li>
           </ul>
         </nav>
       </dialog>

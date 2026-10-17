@@ -5,11 +5,11 @@ import { useEffect, useState } from 'react'
 import { PARENT_PAGES } from '../nav'
 import { summarise } from '../progress'
 import { useApp } from '../store'
-import { ChevronIcon, ChartIcon, GearIcon, MicIcon, PictureIcon, ShareIcon, ShieldIcon, UserIcon } from '../icons'
+import { ChatIcon, ChevronIcon, ChartIcon, GearIcon, MicIcon, PictureIcon, ShareIcon, ShieldIcon, UserIcon } from '../icons'
 
 const PORTFOLIO = process.env.NEXT_PUBLIC_PORTFOLIO_URL || 'https://pradeep.miriyala.in'
 const ICONS: Record<string, React.ReactNode> = {
-  child: <UserIcon />, progress: <ChartIcon />, settings: <GearIcon />, voice: <MicIcon />, pictures: <PictureIcon />, share: <ShareIcon />, privacy: <ShieldIcon />,
+  child: <UserIcon />, progress: <ChartIcon />, settings: <GearIcon />, voice: <MicIcon />, pictures: <PictureIcon />, share: <ShareIcon />, feedback: <ChatIcon />, privacy: <ShieldIcon />,
 }
 
 export default function ParentHub() {
@@ -51,6 +51,7 @@ export default function ParentHub() {
       <p className="ls-links">
         <Link href="/parents/share" className="sq-btn">Share Little Steps</Link>
         <Link href="/about" className="sq-btn">About</Link>
+        <Link href="/copyright" className="sq-btn">Copyright</Link>
         <a href={PORTFOLIO} className="sq-btn" target="_blank" rel="noreferrer">Pradeep Miriyala ↗</a>
         <a href={`${PORTFOLIO}/contact`} className="sq-btn" target="_blank" rel="noreferrer">Get in touch ↗</a>
         <a href="https://github.com/pradeep-miriyala/autism-parenting" className="sq-btn" target="_blank" rel="noreferrer">Source ↗</a>
