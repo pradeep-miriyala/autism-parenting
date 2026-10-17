@@ -56,7 +56,8 @@ Every screen has its own address, so Back, reload and a shared link go where you
 | `/games/<id>` | One game (`/games/count`, `/games/spelling`...); built ahead of time for every id |
 | `/stickers` | The sticker album |
 | `/about` | What Little Steps is, in words for a parent. No links that lead off the site |
-| `/parents` · `/parents/child` · `progress` · `settings` · `voice` · `pictures` · `share` · `privacy` | Everything for grown-ups, behind a press-and-hold lock (`ParentGate`). Open for 15 minutes in that tab, then it closes |
+| `/copyright` | Who made it, what is covered, what stays the parent's (their photos and recordings), and the open source parts it uses. Linked from the menu, About and the parents' page |
+| `/parents` · `/parents/child` · `progress` · `settings` · `voice` · `pictures` · `share` · `feedback` · `privacy` | Everything for grown-ups, behind a press-and-hold lock (`ParentGate`). Open for 15 minutes in that tab, then it closes |
 
 A header runs across the top (`AppShell.tsx`): a back arrow, where you are (`nav.ts` is the one table of titles and
 "back" targets), the sticker count and a menu panel from the right. In a game it carries the blue ▶ for play mode
@@ -155,6 +156,12 @@ file that `scripts/test-thinking.mts` runs thousands of rounds of.
   the link, WhatsApp, email, and a QR code for another phone to scan (`share/share.ts`; the QR grid comes from the small
   `qrcode-generator` package and is drawn here as one SVG path, so it works offline). Only the address of the app is
   shared, never anything about the child, and sharing is not counted.
+- **Feedback.** *For parents → Feedback* (`FeedbackForm.tsx`): a parent picks what it is about (something they like, an
+  idea, something not working, something else), writes up to 1000 letters, and may add an email address if they want
+  a reply. It is sent only when they press Send, to `POST /api/feedback`, which checks every field (`src/lib/feedback.ts`)
+  and saves it in `parenting_feedback`. Unlike the counts it answers honestly, so a parent knows whether it went: if it
+  cannot be sent the words stay in the box. A box that people cannot see catches scripts (they are told it worked and
+  nothing is kept), and one address can send five an hour. The page asks parents not to write their child's name.
 - **Stickers.** Each finished round earns one of 30 stickers, chosen at random, shown in an album the
   child can open. Nothing is ever taken away; an unfinished round earns nothing.
 - **Parent summary.** *For parents → This week*: rounds finished in the last 7 days (a small bar chart and a
@@ -195,6 +202,7 @@ What the server keeps (`src/lib/stats.ts`):
 | `parenting_daily` | one document per India day, counters only | kept |
 | `parenting_live` | the fresh page-load id, the game and a time | TTL index, 15 minutes |
 | `parenting_shared` | a first name, an age group and counts, **only for a parent who switched sharing on** | removed when sharing is switched off, deletable from the portfolio admin, TTL one year |
+| `parenting_feedback` | a message a parent chose to write and send, what kind it is, the time, and an email address **only if they added one** (`src/lib/feedback.ts`) | TTL one year. It is not linked to the counts, and no address, user agent or cookie is kept. The portfolio admin does not read it yet: add a reader there, and show the message as plain text, never as HTML |
 
 There are no cookies, IP addresses, user agents or persistent ids. Counting is off for browsers that
 send Do Not Track or Global Privacy Control, when the parent switches it off (Settings → Privacy), and
@@ -220,7 +228,7 @@ src/games/
 ├── gameDefs.ts · profile.ts · progress.ts · stats.ts (anonymous counts)
 ├── VoiceSettings.tsx · voice/ (store.ts IndexedDB, player.ts Web Audio, pick.ts which clip)
 ├── PicturesSettings.tsx · JigsawGame.tsx (photo or drawn, each round) · PhotoJigsaw.tsx
-├── ShareApp.tsx · share/share.ts (message, links, QR)
+├── ShareApp.tsx · share/share.ts (message, links, QR) · FeedbackForm.tsx
 ├── pictures/ cut.ts (the cut and the table) · prepare.ts (crop and shrink) · store.ts (IndexedDB) · prefs.ts (choices, next picture)
 ├── feedback.ts (voice, ding, buzz, chime) · sprinkles.tsx · useStuck.ts
 ├── HoldToUnlock.tsx · InfoButton.tsx · PwaInstall.tsx · icons.tsx
@@ -231,7 +239,7 @@ src/games/
 └── thinking/ rounds.ts (catalogue, count, pattern, sort, odd, puzzle, dots)
 public/                       # manifest ("Little Steps"), service worker, icons, offline page
 scripts/make-icons.mjs        # regenerates the app icons
-src/lib/stats.ts               # what the server keeps (the dashboard that reads it is on the portfolio)
+src/lib/stats.ts · src/lib/feedback.ts   # what the server keeps (the dashboard that reads it is on the portfolio)
 src/app/api/ping
 src/app/ (page.tsx, games/[game], stickers, about, parents/*: thin pages that render the screens above)
 ```
@@ -292,6 +300,7 @@ node scripts/test-thinking.mts   # How Many?, patterns, Sort It, Odd One Out, Ji
 node scripts/test-habits.mts     # the habit cards: unique, balanced rounds, and gentle wording (no "bad", "naughty"...)
 node scripts/test-progress.mts   # counting, stickers, weekly summary, damaged data
 node scripts/test-stats.mts      # pings are cleaned before they are kept; names are capped; India's day
+node scripts/test-feedback.mts   # feedback: kinds, lengths, emails, hidden characters, scripts; and exactly what is kept
 node scripts/test-share.mts      # share links are encoded and carry only the address; the QR code has its three corner marks
 node scripts/test-jigsaw.mts     # photo Jigsaw: every cut fits and adds up to the picture, knobs stay in their room, crops, next picture
 ```

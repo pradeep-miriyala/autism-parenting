@@ -14,7 +14,7 @@ const NAV_TIMEOUT_MS = 3500
 const FONT_HOSTS = ['fonts.googleapis.com', 'fonts.gstatic.com']
 
 // The addresses that are pages of this app. Anything else (a mistyped address, the API) goes straight to the network.
-const PAGE = /^\/(?:games\/[a-z]+|stickers|about|parents(?:\/[a-z]+)?)?$/
+const PAGE = /^\/(?:games\/[a-z]+|stickers|about|copyright|parents(?:\/[a-z]+)?)?$/
 const isPage = (pathname) => PAGE.test(pathname.replace(/\/+$/, '') || '/')
 
 // A page is saved under its path alone, so /?src=pwa and / are the same copy.

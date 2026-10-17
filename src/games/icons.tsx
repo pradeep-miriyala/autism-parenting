@@ -104,6 +104,14 @@ export function ShareIcon() {
   return <svg {...stroke}><path d="M12 15V4" /><path d="M8 8l4-4 4 4" /><path d="M5 13v6h14v-6" /></svg>
 }
 
+export function ChatIcon() {
+  return <svg {...stroke}><path d="M4 5h16v11H9l-5 4V5z" /><path d="M8 9.5h8M8 12.5h5" /></svg>
+}
+
+export function CopyrightIcon() {
+  return <svg {...stroke}><circle cx="12" cy="12" r="9" /><path d="M14.8 9.6a3.6 3.6 0 1 0 0 4.8" /></svg>
+}
+
 export function ShieldIcon() {
   return <svg {...stroke}><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6l7-3z" /></svg>
 }

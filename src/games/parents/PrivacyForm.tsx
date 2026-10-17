@@ -28,6 +28,10 @@ export default function PrivacyForm() {
           off deletes what was shared.
           {!shareName && !profile.name.trim() ? ' Add your child’s name under Your child first.' : ''}
         </p>
+        <p className="sq-note">
+          Feedback is different: it is sent only when you press Send on the Feedback page. It holds what you wrote and, if
+          you add one, an email address to reply to. It is kept for up to a year and is not linked to anything else.
+        </p>
       </div>
     </div>
   )

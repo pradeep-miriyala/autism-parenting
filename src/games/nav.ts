@@ -22,6 +22,7 @@ export const PARENT_PAGES: { slug: string; title: string; blurb: string }[] = [
   { slug: 'voice', title: 'Your voice', blurb: 'Record your own congratulations' },
   { slug: 'pictures', title: 'Your pictures', blurb: 'Add photos for the Jigsaw' },
   { slug: 'share', title: 'Share the app', blurb: 'Send Little Steps to another family' },
+  { slug: 'feedback', title: 'Feedback', blurb: 'Tell the developer what works and what does not' },
   { slug: 'privacy', title: 'Privacy', blurb: 'What is counted, and what stays on this device' },
 ]
 
@@ -36,6 +37,7 @@ export function placeOf(pathname: string): Place {
     return { title: t.title, icon: t.icon, up: '/', game: true, crumbs: [HOME, { label: t.title, href: path }] }
   }
   if (path === '/stickers') return { title: 'My stickers', up: '/', crumbs: [HOME, { label: 'My stickers', href: path }] }
+  if (path === '/copyright') return { title: 'Copyright', up: '/', crumbs: [HOME, { label: 'Copyright', href: path }] }
   if (path === '/about') return { title: 'About Little Steps', up: '/', crumbs: [HOME, { label: 'About', href: path }] }
   if (path === '/parents') return { title: 'For parents', up: '/', crumbs: [HOME, { label: 'For parents', href: path }] }
   const p = /^\/parents\/([a-z]+)$/.exec(path)

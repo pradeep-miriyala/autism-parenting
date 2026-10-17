@@ -41,7 +41,8 @@ export default function AboutPage() {
         Your child’s rounds, stickers, details, any voice recordings and any photos you add stay on the phone or computer they are made on.
         The only things sent are an anonymous count of visits and finished rounds, and page views through Vercel
         Analytics (no cookies). You can switch both off, and neither is sent if your browser says Do Not Track. A
-        child’s first name is shared only if you turn that on, and switching it off deletes it.
+        child’s first name is shared only if you turn that on, and switching it off deletes it. If you choose to send
+        feedback, what you write is sent to the developer and kept for up to a year.
       </p>
 
       <p className="sq-note">
@@ -51,6 +52,7 @@ export default function AboutPage() {
 
       <p className="ls-links">
         <Link href="/parents" className="sq-btn">For parents</Link>
+        <Link href="/copyright" className="sq-btn">Copyright</Link>
         <Link href="/" className="sq-btn primary">Back to the games</Link>
       </p>
     </div>
