@@ -167,6 +167,8 @@ body:has(.sq-wrap.playmode){padding-top:.5rem}
 .pz-piece.dragging{transition:none;cursor:grabbing;z-index:5;box-shadow:0 10px 24px rgba(15,13,10,.24)}
 .pz-piece.sel{outline:3px solid var(--accent-3);outline-offset:1px}
 .pz-piece.shake{animation:sq-shake .4s ease-in-out,sq-flash .9s ease-out}
+.cs-prompt{margin:.5rem 0 .7rem;text-align:center;font-family:var(--f-display);font-weight:600;font-size:1.5rem;line-height:1.25;color:var(--ink)}
+.th-choices.wrap{flex-wrap:wrap;max-width:360px;margin-left:auto;margin-right:auto}
 /* Memory pairs: cards that turn over */
 .mm-grid{display:grid;gap:.6rem;width:100%;max-width:440px;margin:.5rem auto .6rem}
 .mm-card{position:relative;aspect-ratio:1 / 1;padding:0;border:0;background:none;cursor:pointer;perspective:700px;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
@@ -485,6 +487,13 @@ body:has(.sq-wrap.playmode){padding-top:.5rem}
   .sq-wrap.puzzle .pz-board{grid-column:1;grid-row:1 / span 4;margin:0 auto;max-width:none;width:min(100%, calc((100svh - 76px) * 1.333))}
   .sq-wrap.puzzle .pz-tray{grid-column:2;grid-row:2;margin:0 auto;max-width:none;width:78%;gap:.3rem}
   .sq-wrap.puzzle .pj-stage{grid-column:1;grid-row:1 / span 4;margin:0 auto;max-width:none;width:min(100%, calc((100svh - 76px) * var(--pj-ratio, 1)))}
+  .sq-wrap.shapes .th-card{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);gap:.2rem 1rem;align-items:center}
+  .sq-wrap.shapes .sq-top{grid-column:1;grid-row:1}
+  .sq-wrap.shapes .cs-prompt{grid-column:1;grid-row:2;margin:.2rem 0;font-size:1.15rem}
+  .sq-wrap.shapes .th-choices{grid-column:2;grid-row:1 / span 4;margin:0 auto;gap:.5rem}
+  .sq-wrap.shapes .th-choice{width:68px;height:68px}
+  .sq-wrap.shapes .sq-msg{grid-column:1;grid-row:3}
+  .sq-wrap.shapes .sq-actions{grid-column:1;grid-row:4}
   .sq-wrap.memory .th-card{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:.2rem 1rem;align-items:center}
   .sq-wrap.memory .mm-grid{grid-column:1;grid-row:1 / span 4;margin:0 auto;gap:.35rem;max-width:none;width:min(100%, calc((100svh - 76px) * var(--mm-ratio-n, 1.2)))}
   .sq-wrap.memory .sq-top{grid-column:2;grid-row:1}
