@@ -56,10 +56,33 @@ html.sq-nopull, html.sq-nopull body{overscroll-behavior-y:none}
 body:has(.sq-wrap.playmode) .pr-install{display:none}
 body:has(.sq-wrap.playmode){padding-top:.5rem}
 .sq-playbox{margin-bottom:.2rem}
-.sq-home-groups{display:grid;gap:1.4rem}
-.sq-group-title{display:flex;flex-direction:column;gap:.1rem;margin:0 0 .55rem;padding-bottom:.4rem;border-bottom:1px solid var(--line);
-  font-family:var(--f-display);font-weight:600;font-size:1.15rem;line-height:1.2;color:var(--ink)}
-.sq-group-title small{font-family:var(--f-ui);font-weight:400;font-size:.66rem;letter-spacing:.04em;color:var(--ink-50)}
+.sq-home-groups{display:grid;gap:.8rem}
+/* A group of games as a panel: a header that opens and closes it, and the tiles inside. */
+.sq-panel-h{margin:0;font:inherit}
+.sq-panel-btn{display:flex;align-items:center;gap:.8rem;width:100%;min-height:64px;padding:.6rem .9rem;border:1px solid var(--line);background:#fff;cursor:pointer;
+  text-align:left;color:var(--ink);-webkit-tap-highlight-color:transparent;transition:border-color .2s,background .2s}
+.sq-panel-btn:hover{border-color:var(--accent)}
+.sq-panel-btn:active{background:color-mix(in srgb,var(--accent) 8%,#fff)}
+.sq-panel-btn:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.sq-panel:not(.closed) .sq-panel-btn{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 6%,#fff)}
+.sq-panel-ico{flex:none;font-size:1.9rem;line-height:1}
+.sq-panel-text{display:flex;flex-direction:column;gap:.1rem;min-width:0;flex:1}
+.sq-panel-title{font-family:var(--f-display);font-weight:600;font-size:1.15rem;line-height:1.2}
+.sq-panel-text small{font-family:var(--f-ui);font-weight:400;font-size:.66rem;letter-spacing:.04em;color:var(--ink-50)}
+.sq-panel-count{flex:none;min-width:1.7rem;padding:.15rem .5rem;border-radius:999px;background:color-mix(in srgb,var(--accent) 12%,#fff);font-family:var(--f-ui);font-size:.72rem;font-weight:600;text-align:center;color:var(--ink)}
+.sq-panel-chev{flex:none;display:grid;place-items:center;color:var(--ink-60);transform:rotate(90deg)}
+.sq-panel.closed .sq-panel-chev{transform:rotate(0deg)}
+/* The body is as tall as its tiles when open and nothing when closed; a closed body is also hidden, so its links
+   cannot be reached with the keyboard or read out. */
+.sq-panel-body{display:grid;grid-template-rows:1fr;padding-top:.6rem}
+.sq-panel-inner{min-height:0;overflow:hidden;padding:4px;margin:-4px}
+.sq-panel.closed .sq-panel-body{grid-template-rows:0fr;padding-top:0}
+.sq-panel.closed .sq-panel-inner{visibility:hidden}
+.sq-home-groups.slide .sq-panel-body{transition:grid-template-rows .28s ease,padding-top .28s ease}
+.sq-home-groups.slide .sq-panel-inner{transition:visibility 0s}
+.sq-home-groups.slide .sq-panel.closed .sq-panel-inner{transition:visibility 0s .28s}
+.sq-home-groups.slide .sq-panel-chev{transition:transform .28s ease}
+@media (prefers-reduced-motion:reduce){.sq-home-groups.slide .sq-panel-body,.sq-home-groups.slide .sq-panel-chev,.sq-home-groups.slide .sq-panel-inner{transition:none!important}}
 .sq-tiles{display:grid;grid-template-columns:repeat(2,1fr);gap:.75rem}
 .sq-tile{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.35rem;min-height:132px;padding:1rem .75rem;
   border:1px solid var(--line);background:#fff;cursor:pointer;text-align:center;color:var(--ink);-webkit-tap-highlight-color:transparent;transition:border-color .2s,background .2s}
@@ -411,8 +434,12 @@ body:has(.sq-wrap.playmode){padding-top:.5rem}
   .sq-nav .sq-rotate-nav, .sq-nav .sq-gear-nav, .sq-nav .sq-album-nav, .sq-nav .sq-play-nav{display:grid;flex:none;align-self:center}
   .sq-nav .sq-gamehead{flex:none;margin:0}
   .sq-tiles{grid-template-columns:repeat(4,1fr);gap:.4rem}
-  .sq-home-groups{gap:.7rem}
-  .sq-group-title{flex-direction:row;align-items:baseline;gap:.6rem;margin:0 0 .3rem;padding-bottom:.2rem;font-size:.95rem}
+  .sq-home-groups{gap:.4rem}
+  .sq-panel-btn{min-height:44px;padding:.25rem .7rem;gap:.6rem}
+  .sq-panel-ico{font-size:1.3rem}
+  .sq-panel-title{font-size:.95rem}
+  .sq-panel-text{flex-direction:row;align-items:baseline;gap:.6rem}
+  .sq-panel-body{padding-top:.4rem}
   .sq-tile{min-height:64px;padding:.35rem .3rem;gap:.1rem}
   .sq-tile-ico{font-size:1.5rem}
   .sq-tile small{display:none}

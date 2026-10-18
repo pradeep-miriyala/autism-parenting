@@ -130,11 +130,11 @@ export function keyboardRows(locale: string): string[][] {
 
 /** The games a child chooses from, in groups. A game appears once the screen for it exists. */
 export type GameGroupId = 'numbers' | 'thinking' | 'letters' | 'life'
-export const GAME_GROUPS: { id: GameGroupId; title: string; blurb: string }[] = [
-  { id: 'numbers', title: 'Numbers', blurb: 'Counting and number order' },
-  { id: 'thinking', title: 'Thinking', blurb: 'Patterns, sorting, puzzles and matching' },
-  { id: 'letters', title: 'Letters and writing', blurb: 'Words, letters and drawing' },
-  { id: 'life', title: 'Everyday life', blurb: 'Habits and routines' },
+export const GAME_GROUPS: { id: GameGroupId; title: string; blurb: string; icon: string }[] = [
+  { id: 'numbers', title: 'Numbers', blurb: 'Counting and number order', icon: '🔢' },
+  { id: 'thinking', title: 'Thinking', blurb: 'Patterns, sorting, puzzles and matching', icon: '🧩' },
+  { id: 'letters', title: 'Letters and writing', blurb: 'Words, letters and drawing', icon: '✏️' },
+  { id: 'life', title: 'Everyday life', blurb: 'Habits and routines', icon: '🏠' },
 ]
 
 export const GAME_TILES: { id: GameId; group: GameGroupId; title: string; blurb: string; icon: string }[] = [

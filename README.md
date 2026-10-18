@@ -52,7 +52,7 @@ Every screen has its own address, so Back, reload and a shared link go where you
 
 | Address | What it is |
 |---|---|
-| `/` | The games, in groups; each tile is a link |
+| `/` | The games, in groups; each group is a panel that opens and closes, and each tile is a link |
 | `/games/<id>` | One game (`/games/count`, `/games/spelling`...); built ahead of time for every id |
 | `/stickers` | The sticker album |
 | `/about` | What Little Steps is, in words for a parent. No links that lead off the site |
@@ -93,9 +93,13 @@ file that `scripts/test-thinking.mts` runs thousands of rounds of.
 
 ### How it behaves
 
-- **Tile home.** The page opens on a grid of tiles; a game opens from it. A "Games" button (and the
+- **Tile home.** The page opens on a grid of tiles, one panel for each group of games (Numbers, Thinking, Letters and
+  writing, Everyday life). A panel's header, with its icon, name and number of games, opens and closes it; all are open
+  to begin with, and the device remembers the closed ones (`closedGroups` in the saved settings, `homePanels.ts`; a new
+  group starts open). A closed panel is hidden from the keyboard and from screen readers, takes no room, and slides
+  shut unless the phone asks for reduced motion. A game opens from it. A "Games" button (and the
   phone's Back button) returns. Leaving a round that is under way asks "Finish this one first?".
-  The tiles carry no scores or counts, on purpose.
+  The tiles carry no scores or progress counts, on purpose (a panel's number is only how many games are in it).
 - **Feedback is the same everywhere.** A wrong choice gets a soft buzz and a short shake; every
   right choice gets a small sparkle sound. Both play whether or not the sound setting is on (a game
   that only makes noise for mistakes teaches children to hunt for mistakes). The sound setting adds
