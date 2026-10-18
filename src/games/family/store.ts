@@ -9,7 +9,22 @@ const STORE = 'people'
 /** How many people a parent can add. */
 export const MAX_PEOPLE = 12
 
-export type StoredPerson = { slot: number; name: string; relation: string; blob: Blob; at: number }
+/** `voice` is the parent saying the name, if they recorded it; `voiceMs` is how long it is. */
+export type StoredPerson = { slot: number; name: string; relation: string; blob: Blob; at: number; voice?: Blob; voiceMs?: number }
+
+/** One saved entry, checked; a damaged recording is dropped and the person kept. null if the person itself is unusable. */
+export function cleanPerson(p: unknown): StoredPerson | null {
+  if (!p || typeof p !== 'object') return null
+  const r = p as Record<string, unknown>
+  if (!(r.blob instanceof Blob) || !Number.isInteger(r.slot) || (r.slot as number) < 0 || (r.slot as number) >= MAX_PEOPLE) return null
+  if (typeof r.name !== 'string' || typeof r.relation !== 'string') return null
+  const out: StoredPerson = { slot: r.slot as number, name: r.name, relation: r.relation, blob: r.blob, at: typeof r.at === 'number' ? r.at : 0 }
+  if (r.voice instanceof Blob && r.voice.size > 0) {
+    out.voice = r.voice
+    if (typeof r.voiceMs === 'number' && r.voiceMs > 0 && r.voiceMs < 60_000) out.voiceMs = r.voiceMs
+  }
+  return out
+}
 
 function open(): Promise<IDBDatabase | null> {
   return new Promise(resolve => {
@@ -37,9 +52,7 @@ function run<T, F>(mode: IDBTransactionMode, work: (s: IDBObjectStore) => IDBReq
 
 export async function listPeople(): Promise<StoredPerson[]> {
   const all = await run<StoredPerson[], StoredPerson[]>('readonly', s => s.getAll() as IDBRequest<StoredPerson[]>, [])
-  return all
-    .filter(p => p && p.blob instanceof Blob && Number.isInteger(p.slot) && p.slot >= 0 && p.slot < MAX_PEOPLE && typeof p.name === 'string' && typeof p.relation === 'string')
-    .sort((a, b) => a.slot - b.slot)
+  return all.map(cleanPerson).filter((p): p is StoredPerson => p !== null).sort((a, b) => a.slot - b.slot)
 }
 
 export async function savePerson(person: StoredPerson): Promise<boolean> {

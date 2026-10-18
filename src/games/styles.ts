@@ -348,7 +348,12 @@ body:has(.sq-wrap.playmode){padding-top:.5rem}
 .fa-person{display:grid;grid-template-columns:96px 1fr;gap:.7rem;padding:.6rem;border:1px solid var(--line);background:#fff;align-items:start}
 .fa-person>img,.fa-person>.pc-blank{width:96px;height:96px;object-fit:cover}
 .fa-fields{display:grid;gap:.1rem}
-.fa-fields .sq-btn{justify-self:start;margin-top:.6rem;padding:.5rem .7rem;font-size:.6rem}
+.fa-voice{margin:.6rem 0 .2rem}
+.fa-voice-row{display:flex;flex-wrap:wrap;align-items:center;gap:.4rem .6rem}
+.fa-voice-row .sq-note,.fa-voice-help{margin:0}
+.fa-voice-help{margin-top:.3rem;font-size:.78rem}
+.fa-voice .sq-btn{padding:.5rem .7rem;font-size:.6rem}
+.fa-fields>.sq-btn{justify-self:start;margin-top:.6rem;padding:.5rem .7rem;font-size:.6rem}
 .pc-choices{display:grid;gap:.1rem;margin:.2rem 0 .5rem}
 .sq-subhead{font-family:var(--f-display);font-size:1.05rem;font-weight:600;margin:.2rem 0 .1rem;color:var(--ink)}
 .sq-bars{display:flex;gap:.4rem;align-items:flex-end;height:112px;margin:.5rem 0 .3rem;padding:1rem .2rem 0}

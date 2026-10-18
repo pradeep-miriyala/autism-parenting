@@ -4,7 +4,8 @@
 //   level 2  "Where is Amma?" a picture and a name, and photos to choose from
 //   level 3  the family map   drag or tap each photo to the place for what that person is: grandparents, parents, ...
 // Everything a child needs to understand is a picture, not a word: each relation has its own icon. A word is only ever
-// heard when the child presses a speaker button, and then only that word is said (even with the sound setting off).
+// heard when the child presses a speaker button, and then only that word is said (even with the sound setting off). A
+// person's name is played from the parent's own recording if they made one, and in the computer voice if not.
 // The photos and names stay on this device (family/store.ts). No timer, no score. A wrong choice buzzes and shakes;
 // nothing is lost. If the child is stuck, the right one gently pulses.
 import Link from 'next/link'
@@ -18,17 +19,28 @@ import { SprinklesLayer, useSprinkles } from './sprinkles'
 import { useFeedback } from './feedback'
 import { useStuck } from './useStuck'
 import { SpeakerIcon } from './icons'
+import { playBlob } from './voice/player'
 import InfoButton from './InfoButton'
 import { celebration, isYoung, sprinklePalette, type Profile } from './profile'
 
 const SETTLE_MS = 1200
 const REACH = 14
 
-/** A speaker button: says just this one word, whether or not the sound setting is on, and does nothing else. */
-function Speak({ word, say, big }: { word: string; say: (text: string, force?: boolean) => void; big?: boolean }) {
+/**
+ * A speaker button: says just this one word, whether or not the sound setting is on, and does nothing else. If there
+ * is a recording of a parent saying it, that is played; if not, or if it cannot be played, the computer voice says it.
+ */
+function Speak({ word, voice, say, big }: { word: string; voice?: Blob; say: (text: string, force?: boolean) => void; big?: boolean }) {
+  async function hear() {
+    if (voice) {
+      try { speechSynthesis.cancel() } catch {}
+      if (await playBlob(voice)) return
+    }
+    say(word, true)
+  }
   return (
     <button type="button" className={`fm-say${big ? ' big' : ''}`} aria-label={`Hear the word: ${word}`}
-      onClick={e => { e.stopPropagation(); say(word, true) }}
+      onClick={e => { e.stopPropagation(); hear() }}
       onPointerDown={e => e.stopPropagation()}>
       <SpeakerIcon />
     </button>
@@ -83,6 +95,13 @@ export default function FamilyGame({ level, sound, profile, sprinklesOn, hintSec
 
   const people: Person[] = (stored ?? []).map(p => ({ id: p.slot, name: p.name, relation: p.relation }))
   const byId = new Map(people.map(p => [p.id, p]))
+  const voices = new Map((stored ?? []).filter(p => p.voice).map(p => [p.slot, p.voice as Blob]))
+  /** When the sound setting is on, a right answer says the name: from the recording if there is one. */
+  function speakName(p: Person) {
+    const v = voices.get(p.id)
+    if (v) { if (sound) playBlob(v).then(ok => { if (!ok) say(p.name) }); return }
+    say(p.name)
+  }
   const enough = people.length >= MIN_FAMILY
 
   const newRound = useCallback(() => {
@@ -146,7 +165,7 @@ export default function FamilyGame({ level, sound, profile, sprinklesOn, hintSec
     setSettling(true)
     const who = byId.get(id)!
     setMessage(found(who))
-    say(who.name)
+    speakName(who)
     if (qi + 1 < questions.length) {
       // the next question starts clean: nothing left shaking from the last one
       timer.current = setTimeout(() => { setQi(i => i + 1); setSettling(false); setMessage(''); setShake({ n: 0, at: '' }) }, SETTLE_MS + 400)
@@ -171,7 +190,7 @@ export default function FamilyGame({ level, sound, profile, sprinklesOn, hintSec
     const next = { ...placed, [slot.key]: id }
     setPlaced(next)
     setMessage(found(p))
-    say(p.name)
+    speakName(p)
     if (map && Object.keys(next).length === map.slots.length) finish()
   }
 
@@ -256,7 +275,7 @@ export default function FamilyGame({ level, sound, profile, sprinklesOn, hintSec
                     <span className="fm-icon" aria-hidden="true">{relationIcon(p.relation)}</span>
                     <span className="fm-word">{p.name}</span>
                   </button>
-                  <Speak word={p.name} say={say} />
+                  <Speak word={p.name} voice={voices.get(id)} say={say} />
                 </div>
               )
             })}
@@ -270,7 +289,7 @@ export default function FamilyGame({ level, sound, profile, sprinklesOn, hintSec
         return (
           <>
             <div className="fm-ask" role="group" aria-label={q.prompt}>
-              <Speak word={word} say={say} big />
+              <Speak word={word} voice={q.ask === 'relation' ? undefined : voices.get(target.id)} say={say} big />
               <span className="fm-icon big" aria-hidden="true">{relationIcon(target.relation)}</span>
               <span className="fm-askword">{word}</span>
             </div>
@@ -309,7 +328,7 @@ export default function FamilyGame({ level, sound, profile, sprinklesOn, hintSec
                               ? <><img src={urls[who]} alt="" /><span className="fm-slot-label">{byId.get(who)!.name}</span></>
                               : <span className="fm-slot-hole" aria-hidden="true"><span className="fm-icon">{relationIcon(s.relation)}</span></span>}
                           </div>
-                          <Speak word={who !== undefined ? byId.get(who)!.name : s.label} say={say} />
+                          <Speak word={who !== undefined ? byId.get(who)!.name : s.label} voice={who !== undefined ? voices.get(who) : undefined} say={say} />
                         </div>
                       )
                     })}

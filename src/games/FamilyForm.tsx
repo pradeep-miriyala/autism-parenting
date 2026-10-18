@@ -1,13 +1,53 @@
 'use client'
 // "Family pictures": a parent adds the people their child knows, each with a photo, the name the child uses for them
-// ("Amma", "Uncle Ravi") and what they are to the child. Family Faces plays with them. The photo is made ready on this
-// device (cropped square, shrunk, hidden details such as where it was taken dropped) and everything is kept in this
-// browser only (family/store.ts), never sent anywhere.
+// ("Amma", "Uncle Ravi"), what they are to the child and, if they like, a recording of themselves saying the name (the
+// computer voice may say a family name oddly). Family Faces plays with them. The photo is made ready on this device
+// (cropped square, shrunk, hidden details such as where it was taken dropped) and everything is kept in this browser
+// only (family/store.ts), never sent anywhere. The microphone is asked for only when Record is pressed.
 import Link from 'next/link'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { MAX_PEOPLE, deletePerson, freePlace, listPeople, savePerson, type StoredPerson } from './family/store'
-import { MIN_FAMILY, RELATIONS, cleanPersonName, cleanRelation, relationIcon, sameName, MAX_NAME } from './family/logic'
+import { MIN_FAMILY, NAME_VOICE_MIN_MS, NAME_VOICE_SECONDS, RELATIONS, cleanPersonName, cleanRelation, relationIcon, sameName, MAX_NAME } from './family/logic'
 import { preparePhoto } from './pictures/prepare'
+import { useRecorder } from './voice/useRecorder'
+import { playBlob } from './voice/player'
+
+type Voice = { blob: Blob; ms: number }
+const seconds = (ms: number) => `${Math.max(1, Math.round(ms / 1000))} s`
+
+/** Record, listen to, redo or remove the parent saying a name. The new recording is handed to `onChange` as soon as it stops. */
+function NameVoice({ name, voice, disabled, onChange }: { name: string; voice: Voice | null; disabled?: boolean; onChange: (v: Voice | null) => void }) {
+  const rec = useRecorder(NAME_VOICE_SECONDS, NAME_VOICE_MIN_MS)
+  async function record() {
+    const r = await rec.record()
+    if (r) onChange({ blob: r.blob, ms: r.ms })
+  }
+  return (
+    <div className="fa-voice">
+      <span className="sq-note fa-label">Their name in your voice (optional)</span>
+      {rec.active ? (
+        <div className="fa-voice-row">
+          <span className="sq-note" role="status">Recording… {Math.min(NAME_VOICE_SECONDS, Math.floor(rec.elapsed / 1000))} of {NAME_VOICE_SECONDS} s</span>
+          <button type="button" className="sq-btn primary" onClick={rec.stop}>Stop</button>
+        </div>
+      ) : voice ? (
+        <div className="fa-voice-row">
+          <span className="sq-note">Recorded, {seconds(voice.ms)}</span>
+          <button type="button" className="sq-btn" disabled={disabled} onClick={() => playBlob(voice.blob)}>Listen</button>
+          <button type="button" className="sq-btn" disabled={disabled} onClick={record}>Record again</button>
+          <button type="button" className="sq-btn" disabled={disabled} onClick={() => onChange(null)}>Remove</button>
+        </div>
+      ) : (
+        <div className="fa-voice-row">
+          <span className="sq-note">Not recorded. The computer voice will say it.</span>
+          <button type="button" className="sq-btn" disabled={disabled} onClick={record}>Record</button>
+        </div>
+      )}
+      {rec.error && <p className="sq-note vc-error" role="alert">{rec.error}</p>}
+      <p className="sq-note fa-voice-help">Say it the way you do with your child{name.trim() ? `, for example “${name.trim()}”` : ''}. Up to {NAME_VOICE_SECONDS} seconds. It stays on this device.</p>
+    </div>
+  )
+}
 
 function PersonRow({ person, url, others, busy, onSave, onDelete }: {
   person: StoredPerson
@@ -43,6 +83,9 @@ function PersonRow({ person, url, others, busy, onSave, onDelete }: {
           onChange={e => onSave({ ...person, relation: cleanRelation(e.target.value) })}>
           {RELATIONS.map(r => <option key={r.id} value={r.id}>{relationIcon(r.id)}  {r.label}</option>)}
         </select>
+        <NameVoice name={person.name} disabled={busy}
+          voice={person.voice ? { blob: person.voice, ms: person.voiceMs ?? 0 } : null}
+          onChange={v => onSave({ ...person, voice: v?.blob, voiceMs: v?.ms })} />
         {problem && <p className="sq-note vc-error" role="alert">{problem}</p>}
         <button type="button" className="sq-btn" disabled={busy} onClick={() => { if (!sure) setSure(true); else onDelete(person.slot) }}>
           {sure ? 'Tap again to delete' : 'Delete'}
@@ -59,6 +102,7 @@ export default function FamilyForm() {
   const [preview, setPreview] = useState('')
   const [name, setName] = useState('')
   const [relation, setRelation] = useState('mother')
+  const [voice, setVoice] = useState<Voice | null>(null)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
   const [note, setNote] = useState('')
@@ -92,10 +136,10 @@ export default function FamilyForm() {
     setBusy(true)
     const blob = await preparePhoto(file, 'square')
     if (!blob) { setBusy(false); return setError('That file could not be read as a picture. Please try another photo.') }
-    const ok = await savePerson({ slot, name: clean, relation: cleanRelation(relation), blob, at: Date.now() })
+    const ok = await savePerson({ slot, name: clean, relation: cleanRelation(relation), blob, at: Date.now(), ...(voice ? { voice: voice.blob, voiceMs: voice.ms } : {}) })
     setBusy(false)
     if (!ok) return setError('Could not save on this device. A private window does not keep photos.')
-    setFile(null); setName('')
+    setFile(null); setName(''); setVoice(null)
     await refresh()
     setNote(`Added ${clean}.`)
   }
@@ -122,12 +166,14 @@ export default function FamilyForm() {
       <h3 id="sq-family-title" className="sq-subhead">Family pictures</h3>
       <p className="sq-note">
         Add the people your child knows: family, friends and others. Each one has a photo, the name your child uses for
-        them (such as Amma or Uncle Ravi) and what they are to your child. The game Family Faces uses them to ask “Who is
-        this?” and “Where is Amma?”, and to build a family map.
+        them (such as Amma or Uncle Ravi) and what they are to your child. You can also record yourself saying the name, so
+        your child hears it the way you say it. The game Family Faces uses them to ask “Who is this?” and “Where is
+        Amma?”, and to build a family map.
       </p>
       <p className="sq-note">
-        Photos and names stay on this phone or computer. They are never uploaded. Each photo is cropped square, and anything
-        hidden in the file, such as where it was taken, is dropped.
+        Photos, names and recordings stay on this phone or computer. They are never uploaded. Each photo is cropped square,
+        and anything hidden in the file, such as where it was taken, is dropped. The microphone is used only while you
+        press Record.
       </p>
 
       <h3 className="sq-subhead">Add a person</h3>
@@ -144,6 +190,8 @@ export default function FamilyForm() {
         <select id="fa-relation" className="fb-line" value={relation} disabled={busy || full} onChange={e => setRelation(e.target.value)}>
           {RELATIONS.map(r => <option key={r.id} value={r.id}>{relationIcon(r.id)}  {r.label}</option>)}
         </select>
+
+        <NameVoice name={name} voice={voice} disabled={busy || full} onChange={setVoice} />
 
         {error && <p className="sq-note vc-error" role="alert">{error}</p>}
         {note && <p className="sq-note" role="status">{note}</p>}

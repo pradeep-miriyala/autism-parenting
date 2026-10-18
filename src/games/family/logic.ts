@@ -41,6 +41,10 @@ export const relationIndex = (id: string) => { const i = RELATIONS.findIndex(r =
 /** "Which one is your ...?" makes sense for these. "Me" and "someone special" do not. */
 export const askable = (id: string) => isRelation(id) && id !== 'me' && id !== 'other'
 
+/** A recording of a name is short: one word, said warmly. */
+export const NAME_VOICE_SECONDS = 4
+export const NAME_VOICE_MIN_MS = 400
+
 export const MAX_NAME = 24
 /** A name or what a child calls someone: letters, spaces and the marks names use. */
 export function cleanPersonName(raw: unknown, max = MAX_NAME): string {
