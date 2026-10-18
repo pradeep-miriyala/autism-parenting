@@ -7,10 +7,11 @@
 
 export type GameKey =
   | 'numbers' | 'spelling' | 'spot' | 'trace' | 'letters' | 'match' | 'habits'
-  | 'count' | 'pattern' | 'sort' | 'odd' | 'puzzle' | 'dots'
+  | 'count' | 'pattern' | 'sort' | 'odd' | 'puzzle' | 'dots' | 'memory'
 export const GAME_KEYS: GameKey[] = [
   'numbers', 'spelling', 'spot', 'trace', 'letters', 'match', 'habits',
   'count', 'pattern', 'sort', 'odd', 'puzzle', 'dots',
+  'memory',
 ]
 
 export type Progress = {

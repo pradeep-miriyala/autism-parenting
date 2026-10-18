@@ -167,6 +167,20 @@ body:has(.sq-wrap.playmode){padding-top:.5rem}
 .pz-piece.dragging{transition:none;cursor:grabbing;z-index:5;box-shadow:0 10px 24px rgba(15,13,10,.24)}
 .pz-piece.sel{outline:3px solid var(--accent-3);outline-offset:1px}
 .pz-piece.shake{animation:sq-shake .4s ease-in-out,sq-flash .9s ease-out}
+/* Memory pairs: cards that turn over */
+.mm-grid{display:grid;gap:.6rem;width:100%;max-width:440px;margin:.5rem auto .6rem}
+.mm-card{position:relative;aspect-ratio:1 / 1;padding:0;border:0;background:none;cursor:pointer;perspective:700px;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.mm-card:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.mm-card:disabled{cursor:default}
+.mm-inner{position:absolute;inset:0;transform-style:preserve-3d;transition:transform .4s ease}
+.mm-card.up .mm-inner{transform:rotateY(180deg)}
+.mm-face{position:absolute;inset:0;display:grid;place-items:center;border:2px solid var(--accent);-webkit-backface-visibility:hidden;backface-visibility:hidden}
+.mm-back{background:color-mix(in srgb,var(--accent) 14%,#fff);font-family:var(--f-display);font-weight:600;font-size:2rem;color:var(--accent)}
+.mm-front{background:#fff;transform:rotateY(180deg);padding:.3rem}
+.mm-card.matched .mm-front{border-color:#3F9F68;background:color-mix(in srgb,#3F9F68 10%,#fff)}
+.mm-card.hint .mm-inner{animation:mm-pulse 1.6s ease-in-out infinite}
+@keyframes mm-pulse{0%,100%{filter:none}50%{filter:drop-shadow(0 0 7px var(--accent))}}
+@media (prefers-reduced-motion:reduce){.mm-inner{transition:none}.mm-card.hint .mm-inner{animation:none}.mm-card.hint .mm-back{box-shadow:0 0 0 4px color-mix(in srgb,var(--accent) 35%,transparent)}}
 /* Jigsaw with a photo: board and loose pieces in one drawing */
 .pj-stage{width:100%;max-width:520px;margin:.4rem auto .5rem}
 .pj-svg{display:block;width:100%;height:auto;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
@@ -471,6 +485,12 @@ body:has(.sq-wrap.playmode){padding-top:.5rem}
   .sq-wrap.puzzle .pz-board{grid-column:1;grid-row:1 / span 4;margin:0 auto;max-width:none;width:min(100%, calc((100svh - 76px) * 1.333))}
   .sq-wrap.puzzle .pz-tray{grid-column:2;grid-row:2;margin:0 auto;max-width:none;width:78%;gap:.3rem}
   .sq-wrap.puzzle .pj-stage{grid-column:1;grid-row:1 / span 4;margin:0 auto;max-width:none;width:min(100%, calc((100svh - 76px) * var(--pj-ratio, 1)))}
+  .sq-wrap.memory .th-card{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:.2rem 1rem;align-items:center}
+  .sq-wrap.memory .mm-grid{grid-column:1;grid-row:1 / span 4;margin:0 auto;gap:.35rem;max-width:none;width:min(100%, calc((100svh - 76px) * var(--mm-ratio-n, 1.2)))}
+  .sq-wrap.memory .sq-top{grid-column:2;grid-row:1}
+  .sq-wrap.memory .sq-msg{grid-column:2;grid-row:3}
+  .sq-wrap.memory .sq-actions{grid-column:2;grid-row:4}
+  .sq-wrap.memory .mm-back{font-size:1.4rem}
   .sq-wrap.puzzle .sp-dots{display:none}
   .sq-wrap.puzzle .sq-top{justify-content:flex-end}
   .sq-wrap.puzzle .sq-msg{grid-column:2;grid-row:3}

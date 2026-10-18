@@ -8,6 +8,7 @@ export type KeyGameId = 'numbers' | 'spelling'
 export const ALL_GAME_IDS = [
   'numbers', 'spelling', 'spot', 'trace', 'letters', 'match', 'habits',
   'count', 'pattern', 'sort', 'odd', 'puzzle', 'dots',
+  'memory',
 ] as const
 export type GameId = (typeof ALL_GAME_IDS)[number]
 
@@ -151,6 +152,7 @@ export const GAME_TILES: { id: GameId; group: GameGroupId; title: string; blurb:
   { id: 'letters', group: 'letters', title: 'Letters & Numbers', blurb: 'Draw the letter or number.', icon: '🔤' },
   { id: 'trace', group: 'letters', title: 'Trace the Lines', blurb: 'Draw along the line.', icon: '✏️' },
   { id: 'habits', group: 'life', title: 'Helpful Habits', blurb: 'Sort what helps.', icon: '🪣' },
+  { id: 'memory', group: 'thinking', title: "Memory Pairs", blurb: "Find the matching cards.", icon: '🃏' },
 ]
 
 /** Spot the Differences has no keys: its "length" is how many differences to find. */
@@ -212,6 +214,7 @@ export const GAME_SETTINGS: Record<GameId, { min: number; max: number; def: numb
   odd: { min: 1, max: 3, def: 1, label: 'Odd one out: how alike they are (1 is very different)' },
   puzzle: { min: 1, max: 6, def: 1, label: 'Jigsaw: pieces (1 is four, 4 is twelve, 5 is 24, 6 is 36)', note: 'Levels 5 and 6 are for your own photos. The drawn pictures stop at twelve pieces.' },
   dots: { min: 1, max: 3, def: 1, label: 'Connect the dots: how many dots (1 is up to 6, 3 is up to 15)' },
+  memory: { min: 1, max: 3, def: 1, label: "Memory pairs: how many cards (1 is six, 3 is sixteen)" },
 }
 
 export const isGameId = (x: unknown): x is GameId => (ALL_GAME_IDS as readonly string[]).includes(x as string)
