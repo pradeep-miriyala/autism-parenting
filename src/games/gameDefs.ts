@@ -8,6 +8,11 @@ export type KeyGameId = 'numbers' | 'spelling'
 export const ALL_GAME_IDS = [
   'numbers', 'spelling', 'spot', 'trace', 'letters', 'match', 'habits',
   'count', 'pattern', 'sort', 'odd', 'puzzle', 'dots',
+  'memory',
+  'shapes',
+  'maze',
+  'colouring',
+  'family',
 ] as const
 export type GameId = (typeof ALL_GAME_IDS)[number]
 
@@ -129,12 +134,13 @@ export function keyboardRows(locale: string): string[][] {
 }
 
 /** The games a child chooses from, in groups. A game appears once the screen for it exists. */
-export type GameGroupId = 'numbers' | 'thinking' | 'letters' | 'life'
-export const GAME_GROUPS: { id: GameGroupId; title: string; blurb: string }[] = [
-  { id: 'numbers', title: 'Numbers', blurb: 'Counting and number order' },
-  { id: 'thinking', title: 'Thinking', blurb: 'Patterns, sorting, puzzles and matching' },
-  { id: 'letters', title: 'Letters and writing', blurb: 'Words, letters and drawing' },
-  { id: 'life', title: 'Everyday life', blurb: 'Habits and routines' },
+export type GameGroupId = 'numbers' | 'thinking' | 'letters' | 'people' | 'life'
+export const GAME_GROUPS: { id: GameGroupId; title: string; blurb: string; icon: string }[] = [
+  { id: 'numbers', title: 'Numbers', blurb: 'Counting and number order', icon: '🔢' },
+  { id: 'thinking', title: 'Thinking', blurb: 'Patterns, sorting, puzzles and matching', icon: '🧩' },
+  { id: 'letters', title: 'Letters and writing', blurb: 'Words, letters and drawing', icon: '✏️' },
+  { id: 'people', title: 'Family and people', blurb: 'Faces, names and who is who', icon: '👨‍👩‍👧' },
+  { id: 'life', title: 'Everyday life', blurb: 'Habits and routines', icon: '🏠' },
 ]
 
 export const GAME_TILES: { id: GameId; group: GameGroupId; title: string; blurb: string; icon: string }[] = [
@@ -151,6 +157,11 @@ export const GAME_TILES: { id: GameId; group: GameGroupId; title: string; blurb:
   { id: 'letters', group: 'letters', title: 'Letters & Numbers', blurb: 'Draw the letter or number.', icon: '🔤' },
   { id: 'trace', group: 'letters', title: 'Trace the Lines', blurb: 'Draw along the line.', icon: '✏️' },
   { id: 'habits', group: 'life', title: 'Helpful Habits', blurb: 'Sort what helps.', icon: '🪣' },
+  { id: 'memory', group: 'thinking', title: "Memory Pairs", blurb: "Find the matching cards.", icon: '🃏' },
+  { id: 'shapes', group: 'thinking', title: "Colours and Shapes", blurb: "Find the colour or shape.", icon: '🔶' },
+  { id: 'maze', group: 'thinking', title: "Maze", blurb: "Draw the way through.", icon: '🌀' },
+  { id: 'colouring', group: 'letters', title: "Colour It In", blurb: "Paint the picture.", icon: '🖍️' },
+  { id: 'family', group: 'people', title: "Family Faces", blurb: "Who is who in my family.", icon: '👪' },
 ]
 
 /** Spot the Differences has no keys: its "length" is how many differences to find. */
@@ -212,6 +223,11 @@ export const GAME_SETTINGS: Record<GameId, { min: number; max: number; def: numb
   odd: { min: 1, max: 3, def: 1, label: 'Odd one out: how alike they are (1 is very different)' },
   puzzle: { min: 1, max: 6, def: 1, label: 'Jigsaw: pieces (1 is four, 4 is twelve, 5 is 24, 6 is 36)', note: 'Levels 5 and 6 are for your own photos. The drawn pictures stop at twelve pieces.' },
   dots: { min: 1, max: 3, def: 1, label: 'Connect the dots: how many dots (1 is up to 6, 3 is up to 15)' },
+  memory: { min: 1, max: 3, def: 1, label: "Memory pairs: how many cards (1 is six, 3 is sixteen)" },
+  shapes: { min: 1, max: 3, def: 1, label: "Colours and shapes: how many to choose from (1 is three, 3 is six, asking colour and shape together)" },
+  maze: { min: 1, max: 3, def: 1, label: "Maze: how big (1 is small, 3 is the biggest)" },
+  colouring: { min: 1, max: 3, def: 1, label: "Colour it in: how many parts to paint (1 is a few big parts, 3 is many small ones)" },
+  family: { min: 1, max: 3, def: 1, label: "Family faces: 1 is \"Who is this?\", 2 is \"Where is...?\", 3 is the family map" },
 }
 
 export const isGameId = (x: unknown): x is GameId => (ALL_GAME_IDS as readonly string[]).includes(x as string)

@@ -52,12 +52,12 @@ Every screen has its own address, so Back, reload and a shared link go where you
 
 | Address | What it is |
 |---|---|
-| `/` | The games, in groups; each tile is a link |
+| `/` | The games, in groups; each group is a panel that opens and closes, and each tile is a link |
 | `/games/<id>` | One game (`/games/count`, `/games/spelling`...); built ahead of time for every id |
 | `/stickers` | The sticker album |
 | `/about` | What Little Steps is, in words for a parent. No links that lead off the site |
 | `/copyright` | Who made it, what is covered, what stays the parent's (their photos and recordings), and the open source parts it uses. Linked from the menu, About and the parents' page |
-| `/parents` · `/parents/child` · `progress` · `settings` · `voice` · `pictures` · `share` · `feedback` · `privacy` | Everything for grown-ups, behind a press-and-hold lock (`ParentGate`). Open for 15 minutes in that tab, then it closes |
+| `/parents` · `/parents/child` · `progress` · `settings` · `voice` · `pictures` · `family` · `share` · `feedback` · `privacy` | Everything for grown-ups, behind a press-and-hold lock (`ParentGate`). Open for 15 minutes in that tab, then it closes |
 
 A header runs across the top (`AppShell.tsx`): a back arrow, where you are (`nav.ts` is the one table of titles and
 "back" targets), the sticker count and a menu panel from the right. In a game it carries the blue ▶ for play mode
@@ -83,6 +83,11 @@ inside the game (`GameScreen.tsx`) carries the controls, so the game keeps the r
 | Sort It | Drags a picture to the right bin | By colour, shape, size or what it is; 2–3 bins, 4–8 things |
 | Odd One Out | Taps the one that is different | Another kind of thing (3 or 4 pictures), later a different colour, shape or size |
 | Jigsaw | Drags pieces onto a board that shows the picture faintly. With a parent's photo it is a free table: pieces lie loose and are moved anywhere (see *Your pictures*) | 4, 6, 9 or 12 pieces, and with a photo also 24 and 36; in the drawn version (which stops at 12) every piece has a drawing of its own, so no two pieces look alike |
+| Memory Pairs | Turns over two cards at a time to find matching pictures | 3, 6 or 8 pairs. A pair that matches stays; one that does not turns back after a moment, quietly. No move count, no timer. The word is spoken when sound is on. If stuck, the mate of the turned card (or a card not seen yet) pulses (`memory/logic.ts`) |
+| Colours and Shapes | Taps the one that fits: "Find the red one.", "Find the circle.", "Find the blue triangle." | 5 questions; 3, 4 or 6 choices. Level 1 changes one thing at a time, level 2 changes both but asks about one, level 3 asks about both with look-alikes. Every question has exactly one right answer (`makeShapesRound` in `thinking/rounds.ts`) |
+| Maze | Draws a line with a finger from the start (an animal) to the end (its food) through a maze | 4 by 3, 5 by 4 or 8 by 6 cells. Every maze has exactly one way through and no loops. The line follows the finger as far as there are passages and stops at a wall, which glows; nothing buzzes. Press the end of the line to carry on, press anywhere on it to go back to that place, or tap the next cell for a single step. If stuck, a dotted line shows the way on, or the way back out of a dead end (`maze/maze.ts`) |
+| Colour It In | Picks a colour and touches a part of a picture to paint it, or drags a finger across several | 10 pictures drawn in code as shapes (5 to 12 parts; level 1 uses the three simplest, level 3 all ten), 12 colours. Nothing can go wrong: Undo takes back the last stroke, white takes a colour off, Start again can itself be undone. "I am finished" ends the round and earns a sticker (`colouring/pictures.ts`) |
+| Family Faces | Level 1: "Who is this?" (a photo, three names). Level 2: "Where is Amma?" or "Which one is your mother?" (four photos). Level 3: the family map, dragging each photo to the place for what that person is (grandparents, parents, the child and brothers and sisters, friends) | Uses the people a parent adds on *For parents → Family pictures*; needs at least two. Every question has exactly one right answer even if two people share a relation or look-alike names (`family/logic.ts`). With fewer than two people the game says to ask a grown-up |
 | Helpful Habits | A card shows something a child does; drag it to "Helps me" or "Does not help me" (or tap the bucket) | 28 cards; 3–10 per round; right = sparkle and a sentence ("Brushing my teeth helps me."); wrong = buzz and the card slides back; no "good"/"bad" wording |
 
 The home screen groups the games (Numbers, Thinking, Letters and writing, Everyday life) in `GAME_GROUPS` and
@@ -93,9 +98,13 @@ file that `scripts/test-thinking.mts` runs thousands of rounds of.
 
 ### How it behaves
 
-- **Tile home.** The page opens on a grid of tiles; a game opens from it. A "Games" button (and the
+- **Tile home.** The page opens on a grid of tiles, one panel for each group of games (Numbers, Thinking, Letters and
+  writing, Family and people, Everyday life). A panel's header, with its icon, name and number of games, opens and closes it; all are open
+  to begin with, and the device remembers the closed ones (`closedGroups` in the saved settings, `homePanels.ts`; a new
+  group starts open). A closed panel is hidden from the keyboard and from screen readers, takes no room, and slides
+  shut unless the phone asks for reduced motion. A game opens from it. A "Games" button (and the
   phone's Back button) returns. Leaving a round that is under way asks "Finish this one first?".
-  The tiles carry no scores or counts, on purpose.
+  The tiles carry no scores or progress counts, on purpose (a panel's number is only how many games are in it).
 - **Feedback is the same everywhere.** A wrong choice gets a soft buzz and a short shake; every
   right choice gets a small sparkle sound. Both play whether or not the sound setting is on (a game
   that only makes noise for mistakes teaches children to hunt for mistakes). The sound setting adds
@@ -162,6 +171,12 @@ file that `scripts/test-thinking.mts` runs thousands of rounds of.
   and saves it in `parenting_feedback`. Unlike the counts it answers honestly, so a parent knows whether it went: if it
   cannot be sent the words stay in the box. A box that people cannot see catches scripts (they are told it worked and
   nothing is kept), and one address can send five an hour. The page asks parents not to write their child's name.
+- **Family pictures.** *For parents → Family pictures* (`FamilyForm.tsx`): up to 12 people, each with a photo (cropped
+  square and shrunk to 600 by 600 on the device, hidden details dropped), the name the child uses ("Amma", "Uncle Ravi",
+  letters only, up to 24) and what they are to the child (mother, father, grandmother, brother, friend and so on). Two people
+  cannot have names that look the same, because a child could not tell the choices apart. The name and relation can be
+  changed later, and delete takes two taps. Everything is kept in IndexedDB on that device only (`family/store.ts`), never
+  uploaded and never counted; the page, the Privacy page, About and Copyright all say so. Only the game's id is ever counted.
 - **Stickers.** Each finished round earns one of 30 stickers, chosen at random, shown in an album the
   child can open. Nothing is ever taken away; an unfinished round earns nothing.
 - **Parent summary.** *For parents → This week*: rounds finished in the last 7 days (a small bar chart and a
@@ -228,6 +243,8 @@ src/games/
 ├── gameDefs.ts · profile.ts · progress.ts · stats.ts (anonymous counts)
 ├── VoiceSettings.tsx · voice/ (store.ts IndexedDB, player.ts Web Audio, pick.ts which clip)
 ├── PicturesSettings.tsx · JigsawGame.tsx (photo or drawn, each round) · PhotoJigsaw.tsx
+├── MemoryGame.tsx · memory/logic.ts (cards, turning, hints) · ShapesGame.tsx · MazeGame.tsx · maze/maze.ts (maze, way through, walking the line) · ColouringGame.tsx · colouring/pictures.ts (pictures as shapes, colours)
+├── FamilyGame.tsx · FamilyForm.tsx · family/ (logic.ts relations, questions and map; store.ts IndexedDB)
 ├── ShareApp.tsx · share/share.ts (message, links, QR) · FeedbackForm.tsx
 ├── pictures/ cut.ts (the cut and the table) · prepare.ts (crop and shrink) · store.ts (IndexedDB) · prefs.ts (choices, next picture)
 ├── feedback.ts (voice, ding, buzz, chime) · sprinkles.tsx · useStuck.ts
@@ -300,6 +317,11 @@ node scripts/test-thinking.mts   # How Many?, patterns, Sort It, Odd One Out, Ji
 node scripts/test-habits.mts     # the habit cards: unique, balanced rounds, and gentle wording (no "bad", "naughty"...)
 node scripts/test-progress.mts   # counting, stickers, weekly summary, damaged data
 node scripts/test-stats.mts      # pings are cleaned before they are kept; names are capped; India's day
+node scripts/test-family.mts     # family faces: one right answer for any family, relation questions only when one person fits, the map has a place for all
+node scripts/test-colouring.mts  # colour it in: every part of every picture is big enough to touch and not hidden under another
+node scripts/test-maze.mts       # maze: one way through and no loops at every size, and no swipe, however wild, can cross a wall
+node scripts/test-shapes.mts     # colours and shapes: exactly one right answer in every question, at every level
+node scripts/test-memory.mts     # memory pairs: every picture twice, turning rules, hints, and a simulated player finishes
 node scripts/test-feedback.mts   # feedback: kinds, lengths, emails, hidden characters, scripts; and exactly what is kept
 node scripts/test-share.mts      # share links are encoded and carry only the address; the QR code has its three corner marks
 node scripts/test-jigsaw.mts     # photo Jigsaw: every cut fits and adds up to the picture, knobs stay in their room, crops, next picture

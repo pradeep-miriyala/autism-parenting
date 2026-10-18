@@ -4,12 +4,13 @@
 // localStorage (the same two keys the single-page version used, so nothing a family has saved is lost).
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import { usePathname } from 'next/navigation'
-import { ALL_GAME_IDS, GAME_SETTINGS, LETTER_CASES, WORD_TYPES, isGameId, type GameId, type WordType } from './gameDefs'
+import { ALL_GAME_IDS, GAME_GROUPS, GAME_SETTINGS, LETTER_CASES, WORD_TYPES, isGameId, type GameGroupId, type GameId, type WordType } from './gameDefs'
 import { THEMES, type ThemeId } from './spot/generate'
 import { WORD_SETS, type MatchSet } from './match/generate'
 import { allCharacters, type LetterCase } from './trace/letters'
 import type { TraceMode } from './TraceGame'
 import { ageBand, forgetShared, newShareId, useStats } from './stats'
+import { cleanClosed, toggleClosed } from './homePanels'
 import { DEFAULT_JIGSAW, cleanJigsaw, type JigsawPrefs } from './pictures/prefs'
 import { setEnabled as setRecordingsEnabled, loadClips, unlockOnGesture } from './voice/player'
 import { EMPTY_PROGRESS, cleanProgress, recordRound, type GameKey, type Progress } from './progress'
@@ -21,6 +22,7 @@ const PROGRESS_STORE = 'parentingProgress.v1'   // rounds finished and stickers:
 /** How long a child may pause before the next key glows. 0 turns hints off. */
 export const HINT_CHOICES = [0, 6, 10, 15, 20]
 const DEFAULT_HINT_SEC = 10
+const GROUP_IDS = GAME_GROUPS.map(g => g.id)
 const DEFAULT_LENGTHS = Object.fromEntries(ALL_GAME_IDS.map(id => [id, GAME_SETTINGS[id].def])) as Record<GameId, number>
 
 export type Store = {
@@ -33,6 +35,8 @@ export type Store = {
   traceMode: TraceMode; setTraceMode: (m: TraceMode) => void
   useRecordings: boolean; setUseRecordings: (v: boolean) => void
   jigsaw: JigsawPrefs; setJigsaw: (patch: Partial<JigsawPrefs>) => void
+  /** The panels on the front screen that are closed (the others are open). */
+  closedGroups: GameGroupId[]; toggleGroup: (id: GameGroupId) => void
   // what each game remembers
   spotTheme: ThemeId; setSpotTheme: (t: ThemeId) => void
   matchSet: MatchSet; setMatchSet: (s: MatchSet) => void
@@ -96,6 +100,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [shareId, setShareId] = useState('')
   const [useRecordings, setUseRecordings] = useState(true)
   const [jigsaw, setJigsawState] = useState<JigsawPrefs>(DEFAULT_JIGSAW)
+  const [closedGroups, setClosedGroups] = useState<GameGroupId[]>([])
   const [roundActive, setRoundActive] = useState(false)
   const [progress, setProgress] = useState<Progress>(EMPTY_PROGRESS)
   const progressRef = useRef<Progress>(EMPTY_PROGRESS)
@@ -135,6 +140,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       if (typeof s.shareCounts === 'boolean') setShareCounts(s.shareCounts)
       if (typeof s.useRecordings === 'boolean') setUseRecordings(s.useRecordings)
       setJigsawState(cleanJigsaw(s.jigsaw))
+      setClosedGroups(cleanClosed(s.closedGroups, GROUP_IDS) as GameGroupId[])
       if (s.shareName === true && typeof s.shareId === 'string' && /^[A-Za-z0-9_-]{12,40}$/.test(s.shareId)) { setShareName(true); setShareId(s.shareId) }
       if (HINT_CHOICES.includes(s.hintSec)) setHintSec(s.hintSec)
       const pr = s.profile
@@ -173,10 +179,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       localStorage.setItem(STORE, JSON.stringify({
         game: lastGame, wordType, spotTheme, matchSet, letterPos, traceMode, letterCase, lengths, sound,
         sprinkles: sprinklesOn, hintSec, profile, setupSeen, playMode, shareCounts, shareName,
-        shareId: shareName ? shareId : '', useRecordings, jigsaw,
+        shareId: shareName ? shareId : '', useRecordings, jigsaw, closedGroups,
       }))
     } catch {}
-  }, [lastGame, wordType, spotTheme, matchSet, letterPos, traceMode, letterCase, lengths, sound, sprinklesOn, hintSec, profile, setupSeen, playMode, shareCounts, shareName, shareId, useRecordings, jigsaw])
+  }, [lastGame, wordType, spotTheme, matchSet, letterPos, traceMode, letterCase, lengths, sound, sprinklesOn, hintSec, profile, setupSeen, playMode, shareCounts, shareName, shareId, useRecordings, jigsaw, closedGroups])
 
   // The recordings are read at start-up, and the audio engine is woken by the first touch.
   useEffect(() => { unlockOnGesture(); loadClips() }, [])
@@ -262,6 +268,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     if (first) setLengths(startingLengths(age!))
   }, [profile.age])
   const setJigsaw = useCallback((patch: Partial<JigsawPrefs>) => setJigsawState(j => ({ ...j, ...patch })), [])
+  const toggleGroup = useCallback((id: GameGroupId) => setClosedGroups(c => toggleClosed(c, id, GROUP_IDS) as GameGroupId[]), [])
   const changeLength = useCallback((id: GameId, n: number) => setLengths(l => ({ ...l, [id]: n })), [])
 
   // ── Sharing the name is a parent's choice, and undoing it deletes what was shared ──
@@ -294,14 +301,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const value = useMemo<Store>(() => ({
     ready, sound, setSound, sprinklesOn, setSprinklesOn, hintSec, setHintSec, lengths, changeLength, traceMode, setTraceMode,
-    useRecordings, setUseRecordings, jigsaw, setJigsaw, spotTheme, setSpotTheme, matchSet, setMatchSet, letterCase, setLetterCase, wordType, setWordType,
+    useRecordings, setUseRecordings, jigsaw, setJigsaw, closedGroups, toggleGroup, spotTheme, setSpotTheme, matchSet, setMatchSet, letterCase, setLetterCase, wordType, setWordType,
     letterPos, rememberLetter, restartLetterOrder, profile, editProfile, chooseAge, forgetChild,
     setupSeen, markSetupSeen: () => setSetupSeen(true),
     shareCounts, changeCounting, shareName, shareId, startSharing, stopSharing,
     progress, finishRound, clearProgress, newSticker, dismissSticker,
     playMode, setPlayMode, lastGame, setLastGame, roundActive, setRoundActive,
     compact, toggleRotate, toast, showToast,
-  }), [ready, sound, sprinklesOn, hintSec, lengths, changeLength, traceMode, useRecordings, jigsaw, setJigsaw, spotTheme, matchSet, letterCase, wordType,
+  }), [ready, sound, sprinklesOn, hintSec, lengths, changeLength, traceMode, useRecordings, jigsaw, setJigsaw, closedGroups, toggleGroup, spotTheme, matchSet, letterCase, wordType,
     letterPos, rememberLetter, restartLetterOrder, profile, editProfile, chooseAge, forgetChild, setupSeen,
     shareCounts, changeCounting, shareName, shareId, startSharing, stopSharing, progress, finishRound, clearProgress,
     newSticker, dismissSticker, playMode, lastGame, roundActive, compact, toggleRotate, toast, showToast])

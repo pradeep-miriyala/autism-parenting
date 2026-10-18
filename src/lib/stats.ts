@@ -20,6 +20,11 @@ import type { Db } from 'mongodb'
 export const PARENTING_GAMES = [
   'numbers', 'spelling', 'spot', 'trace', 'letters', 'match', 'habits',
   'count', 'pattern', 'sort', 'odd', 'puzzle', 'dots',
+  'memory',
+  'shapes',
+  'maze',
+  'colouring',
+  'family',
 ] as const
 export type PGame = (typeof PARENTING_GAMES)[number]
 
@@ -27,6 +32,11 @@ export const GAME_LABELS: Record<PGame, string> = {
   numbers: 'Number Steps', spelling: 'Spelling Bees', spot: 'Spot the Differences',
   trace: 'Trace the Lines', letters: 'Letters & Numbers', match: 'Matching Objects', habits: 'Helpful Habits',
   count: 'How Many?', pattern: 'What Comes Next?', sort: 'Sort It', odd: 'Odd One Out', puzzle: 'Jigsaw', dots: 'Connect the Dots',
+  memory: "Memory Pairs",
+  shapes: "Colours and Shapes",
+  maze: "Maze",
+  colouring: "Colour It In",
+  family: "Family Faces",
 }
 
 export const AGE_BANDS = ['u4', '5-6', '7-8', '9+'] as const

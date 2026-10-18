@@ -424,3 +424,81 @@ export function makePuzzleScene(cols: number, rows: number, w: number, h: number
   }))
   return { bg: pickOne(PUZZLE_BG, rand), objs }
 }
+
+
+// ════════════ colours and shapes ════════════
+//
+// "Find the red one." "Find the circle." "Find the blue triangle." Every question has exactly one right answer, so a
+// child is never told "wrong" for a choice that fits. Level 1 changes one thing at a time (all the same shape when
+// the question is about colour, all the same colour when it is about shape). Level 2 changes both but asks about
+// one. Level 3 asks about both, with look-alikes that share the colour or the shape.
+
+export const SHAPES_QUESTIONS = 5
+export const SHAPES_OPTIONS: Record<number, number> = { 1: 3, 2: 4, 3: 6 }
+export const shapesOptionCount = (level: number) => SHAPES_OPTIONS[Math.min(3, Math.max(1, Math.round(level)))]
+
+export type ShapeOption = { id: string; shape: ShapeName; colour: string; word: string }
+export type ShapeQuestion = {
+  ask: 'colour' | 'shape' | 'both'
+  /** What is asked for: the shape, the colour (a key of SHAPE_COLOURS), or both. */
+  shape?: ShapeName
+  colour?: string
+  prompt: string
+  options: ShapeOption[]
+  answer: number
+}
+
+const colourWord = (key: string) => SHAPE_COLOURS.find(c => c.key === key)!.word
+const shapeOption = (shape: ShapeName, colour: string): ShapeOption =>
+  ({ id: `${shape}-${colour}`, shape, colour, word: `${colourWord(colour)} ${shape}` })
+
+export function makeShapesRound(level: number, rand: () => number = Math.random): ShapeQuestion[] {
+  const n = shapesOptionCount(level)
+  const out: ShapeQuestion[] = []
+  let lastPrompt = ''
+  for (let guard = 0; out.length < SHAPES_QUESTIONS && guard < 200; guard++) {
+    const ask: ShapeQuestion['ask'] = level >= 3 ? 'both' : rand() < 0.5 ? 'colour' : 'shape'
+    let options: ShapeOption[]
+    let target: ShapeOption
+    if (level === 1) {
+      // one thing changes: the same shape in different colours, or the same colour in different shapes
+      if (ask === 'colour') {
+        const shape = pickOne([...SHAPES], rand)
+        options = shuffle(SHAPE_COLOURS, rand).slice(0, n).map(c => shapeOption(shape, c.key))
+      } else {
+        const colour = pickOne(SHAPE_COLOURS, rand).key
+        options = shuffle([...SHAPES], rand).slice(0, n).map(s => shapeOption(s, colour))
+      }
+    } else if (level === 2) {
+      // both change, and no two share a colour or a shape, so the question has one answer
+      const shapes = shuffle([...SHAPES], rand).slice(0, n)
+      const colours = shuffle(SHAPE_COLOURS, rand).slice(0, n)
+      options = shapes.map((s, i) => shapeOption(s, colours[i].key))
+    } else {
+      // the target, two that share its shape, two that share its colour, and one that shares neither
+      const s = pickOne([...SHAPES], rand), c = pickOne(SHAPE_COLOURS, rand).key
+      const otherShapes = shuffle(SHAPES.filter(x => x !== s), rand)
+      const otherColours = shuffle(SHAPE_COLOURS.filter(x => x.key !== c), rand)
+      options = [
+        shapeOption(s, c),
+        shapeOption(s, otherColours[0].key), shapeOption(s, otherColours[1].key),
+        shapeOption(otherShapes[0], c), shapeOption(otherShapes[1], c),
+        shapeOption(otherShapes[2], otherColours[2].key),
+      ]
+    }
+    options = shuffle(options, rand)
+    // at level 3 the target is the one that shares its shape with two others and its colour with two others
+    target = level >= 3
+      ? options.find(p => options.filter(q => q.shape === p.shape).length >= 3 && options.filter(q => q.colour === p.colour).length >= 3)!
+      : pickOne(options, rand)
+    const q: ShapeQuestion = ask === 'colour'
+      ? { ask, colour: target.colour, prompt: `Find the ${colourWord(target.colour)} one.`, options, answer: options.indexOf(target) }
+      : ask === 'shape'
+        ? { ask, shape: target.shape, prompt: `Find the ${target.shape}.`, options, answer: options.indexOf(target) }
+        : { ask, shape: target.shape, colour: target.colour, prompt: `Find the ${target.word}.`, options, answer: options.indexOf(target) }
+    if (q.prompt === lastPrompt) continue
+    lastPrompt = q.prompt
+    out.push(q)
+  }
+  return out
+}
