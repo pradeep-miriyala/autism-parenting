@@ -85,6 +85,7 @@ inside the game (`GameScreen.tsx`) carries the controls, so the game keeps the r
 | Jigsaw | Drags pieces onto a board that shows the picture faintly. With a parent's photo it is a free table: pieces lie loose and are moved anywhere (see *Your pictures*) | 4, 6, 9 or 12 pieces, and with a photo also 24 and 36; in the drawn version (which stops at 12) every piece has a drawing of its own, so no two pieces look alike |
 | Memory Pairs | Turns over two cards at a time to find matching pictures | 3, 6 or 8 pairs. A pair that matches stays; one that does not turns back after a moment, quietly. No move count, no timer. The word is spoken when sound is on. If stuck, the mate of the turned card (or a card not seen yet) pulses (`memory/logic.ts`) |
 | Colours and Shapes | Taps the one that fits: "Find the red one.", "Find the circle.", "Find the blue triangle." | 5 questions; 3, 4 or 6 choices. Level 1 changes one thing at a time, level 2 changes both but asks about one, level 3 asks about both with look-alikes. Every question has exactly one right answer (`makeShapesRound` in `thinking/rounds.ts`) |
+| Maze | Draws a line with a finger from the start (an animal) to the end (its food) through a maze | 4 by 3, 5 by 4 or 8 by 6 cells. Every maze has exactly one way through and no loops. The line follows the finger as far as there are passages and stops at a wall, which glows; nothing buzzes. Press the end of the line to carry on, press anywhere on it to go back to that place, or tap the next cell for a single step. If stuck, a dotted line shows the way on, or the way back out of a dead end (`maze/maze.ts`) |
 | Helpful Habits | A card shows something a child does; drag it to "Helps me" or "Does not help me" (or tap the bucket) | 28 cards; 3–10 per round; right = sparkle and a sentence ("Brushing my teeth helps me."); wrong = buzz and the card slides back; no "good"/"bad" wording |
 
 The home screen groups the games (Numbers, Thinking, Letters and writing, Everyday life) in `GAME_GROUPS` and
@@ -234,7 +235,7 @@ src/games/
 ├── gameDefs.ts · profile.ts · progress.ts · stats.ts (anonymous counts)
 ├── VoiceSettings.tsx · voice/ (store.ts IndexedDB, player.ts Web Audio, pick.ts which clip)
 ├── PicturesSettings.tsx · JigsawGame.tsx (photo or drawn, each round) · PhotoJigsaw.tsx
-├── MemoryGame.tsx · memory/logic.ts (cards, turning, hints) · ShapesGame.tsx
+├── MemoryGame.tsx · memory/logic.ts (cards, turning, hints) · ShapesGame.tsx · MazeGame.tsx · maze/maze.ts (maze, way through, walking the line)
 ├── ShareApp.tsx · share/share.ts (message, links, QR) · FeedbackForm.tsx
 ├── pictures/ cut.ts (the cut and the table) · prepare.ts (crop and shrink) · store.ts (IndexedDB) · prefs.ts (choices, next picture)
 ├── feedback.ts (voice, ding, buzz, chime) · sprinkles.tsx · useStuck.ts
@@ -307,6 +308,7 @@ node scripts/test-thinking.mts   # How Many?, patterns, Sort It, Odd One Out, Ji
 node scripts/test-habits.mts     # the habit cards: unique, balanced rounds, and gentle wording (no "bad", "naughty"...)
 node scripts/test-progress.mts   # counting, stickers, weekly summary, damaged data
 node scripts/test-stats.mts      # pings are cleaned before they are kept; names are capped; India's day
+node scripts/test-maze.mts       # maze: one way through and no loops at every size, and no swipe, however wild, can cross a wall
 node scripts/test-shapes.mts     # colours and shapes: exactly one right answer in every question, at every level
 node scripts/test-memory.mts     # memory pairs: every picture twice, turning rules, hints, and a simulated player finishes
 node scripts/test-feedback.mts   # feedback: kinds, lengths, emails, hidden characters, scripts; and exactly what is kept

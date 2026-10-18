@@ -169,6 +169,16 @@ body:has(.sq-wrap.playmode){padding-top:.5rem}
 .pz-piece.shake{animation:sq-shake .4s ease-in-out,sq-flash .9s ease-out}
 .cs-prompt{margin:.5rem 0 .7rem;text-align:center;font-family:var(--f-display);font-weight:600;font-size:1.5rem;line-height:1.25;color:var(--ink)}
 .th-choices.wrap{flex-wrap:wrap;max-width:360px;margin-left:auto;margin-right:auto}
+.mz-board{background:#fff;border:1px solid var(--line);margin:.5rem 0}
+.mz-board svg{display:block;width:100%;height:auto;touch-action:manipulation;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}
+.mz-path{stroke:var(--accent);stroke-opacity:.7;stroke-linecap:round;stroke-linejoin:round;pointer-events:none;transition:stroke .4s}
+.mz-path.won{stroke:#3F9F68;stroke-opacity:.85}
+.mz-head{fill:var(--accent);fill-opacity:.9;pointer-events:none;animation:sp-pulse 1.8s ease-in-out infinite}
+.mz-emoji{pointer-events:none;user-select:none}
+.mz-guide{stroke:var(--accent-3,#C0832B);stroke-width:5;stroke-linecap:round;stroke-dasharray:2 11;pointer-events:none;animation:sp-pulse 1.4s ease-in-out infinite}
+.mz-bump{stroke:var(--accent-3,#C0832B);stroke-width:7;stroke-linecap:round;pointer-events:none;animation:mz-bump .7s ease-out forwards}
+@keyframes mz-bump{from{stroke-opacity:1}to{stroke-opacity:0}}
+@media (prefers-reduced-motion:reduce){.mz-head,.mz-guide{animation:none}.mz-bump{animation:none;stroke-opacity:.6}}
 /* Memory pairs: cards that turn over */
 .mm-grid{display:grid;gap:.6rem;width:100%;max-width:440px;margin:.5rem auto .6rem}
 .mm-card{position:relative;aspect-ratio:1 / 1;padding:0;border:0;background:none;cursor:pointer;perspective:700px;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
@@ -494,6 +504,11 @@ body:has(.sq-wrap.playmode){padding-top:.5rem}
   .sq-wrap.shapes .th-choice{width:68px;height:68px}
   .sq-wrap.shapes .sq-msg{grid-column:1;grid-row:3}
   .sq-wrap.shapes .sq-actions{grid-column:1;grid-row:4}
+  .sq-wrap.maze .th-card{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:.2rem 1rem;align-items:center}
+  .sq-wrap.maze .mz-board{grid-column:1;grid-row:1 / span 4;margin:0 auto;width:min(100%, calc((100svh - 76px) * 1.333))}
+  .sq-wrap.maze .sq-top{grid-column:2;grid-row:1}
+  .sq-wrap.maze .sq-msg{grid-column:2;grid-row:3}
+  .sq-wrap.maze .sq-actions{grid-column:2;grid-row:4}
   .sq-wrap.memory .th-card{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:.2rem 1rem;align-items:center}
   .sq-wrap.memory .mm-grid{grid-column:1;grid-row:1 / span 4;margin:0 auto;gap:.35rem;max-width:none;width:min(100%, calc((100svh - 76px) * var(--mm-ratio-n, 1.2)))}
   .sq-wrap.memory .sq-top{grid-column:2;grid-row:1}
