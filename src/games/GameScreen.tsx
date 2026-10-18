@@ -21,6 +21,7 @@ import MemoryGame from './MemoryGame'
 import ShapesGame from './ShapesGame'
 import MazeGame from './MazeGame'
 import ColouringGame from './ColouringGame'
+import FamilyGame from './FamilyGame'
 import KeyGame from './KeyGame'
 import { WORD_SETS } from './match/generate'
 import { AlbumIcon, LandscapeIcon, MenuIcon, PlayIcon, PortraitIcon } from './icons'
@@ -34,7 +35,7 @@ const WORD_SET_CHIPS: { id: (typeof WORD_SETS)[number]; label: string; short: st
   { id: 'words-colours', label: 'Words and colours', short: 'Colours', icon: '🎨' },
 ]
 
-const THINKING: GameId[] = ['count', 'pattern', 'sort', 'odd', 'puzzle', 'dots', 'memory', 'shapes', 'maze', 'colouring']
+const THINKING: GameId[] = ['count', 'pattern', 'sort', 'odd', 'puzzle', 'dots', 'memory', 'shapes', 'maze', 'colouring', 'family']
 
 export default function GameScreen({ id }: { id: GameId }) {
   const app = useApp()
@@ -171,6 +172,7 @@ export default function GameScreen({ id }: { id: GameId }) {
         : id === 'shapes' ? <ShapesGame level={level} {...common} />
         : id === 'maze' ? <MazeGame level={level} {...common} />
         : id === 'colouring' ? <ColouringGame level={level} {...common} />
+        : id === 'family' ? <FamilyGame level={level} {...common} />
         : id === 'habits' ? <HabitsGame count={level} {...common} />
         : <KeyGame id={id} length={level} wordType={app.wordType} {...common} />}
     </div>

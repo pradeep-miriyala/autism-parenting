@@ -27,7 +27,7 @@ export default function CopyrightPage() {
 
       <h2 className="sq-subhead">What stays yours</h2>
       <p className="sq-ph-text">
-        The photos you add to the Jigsaw and the recordings you make are yours. They stay on your phone or computer.
+        The photos you add to the Jigsaw, the family pictures and names you add, and the recordings you make are yours. They stay on your phone or computer.
         Little Steps makes no claim on them.
       </p>
 

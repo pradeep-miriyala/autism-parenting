@@ -28,6 +28,7 @@ export default function AboutPage() {
         <li>Every few finished rounds earns a sticker. Stickers are only ever added.</li>
         <li>You can record your own voice to congratulate your child, in place of the computer voice.</li>
         <li>You can add your own photos to the Jigsaw. Each one is cut into pieces in a new way every time.</li>
+        <li>You can add pictures of the people your child knows, with the names your child uses, and practise who is who.</li>
       </ul>
 
       <h2 className="sq-subhead">Play mode</h2>
@@ -38,7 +39,7 @@ export default function AboutPage() {
 
       <h2 className="sq-subhead">Privacy</h2>
       <p className="sq-ph-text">
-        Your child’s rounds, stickers, details, any voice recordings and any photos you add stay on the phone or computer they are made on.
+        Your child’s rounds, stickers, details, any voice recordings, any photos you add and any family pictures and names stay on the phone or computer they are made on.
         The only things sent are an anonymous count of visits and finished rounds, and page views through Vercel
         Analytics (no cookies). You can switch both off, and neither is sent if your browser says Do Not Track. A
         child’s first name is shared only if you turn that on, and switching it off deletes it. If you choose to send

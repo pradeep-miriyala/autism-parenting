@@ -10,7 +10,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "test": "node scripts/test-spot.mts && node scripts/test-trace.mts && node scripts/test-progress.mts && node scripts/test-match.mts && node scripts/test-habits.mts && node scripts/test-voice.mts && node scripts/test-thinking.mts && node scripts/test-stats.mts && node scripts/test-jigsaw.mts && node scripts/test-share.mts && node scripts/test-feedback.mts && node scripts/test-home.mts && node scripts/test-memory.mts && node scripts/test-shapes.mts && node scripts/test-maze.mts && node scripts/test-colouring.mts",
+    "test": "node scripts/test-spot.mts && node scripts/test-trace.mts && node scripts/test-progress.mts && node scripts/test-match.mts && node scripts/test-habits.mts && node scripts/test-voice.mts && node scripts/test-thinking.mts && node scripts/test-stats.mts && node scripts/test-jigsaw.mts && node scripts/test-share.mts && node scripts/test-feedback.mts && node scripts/test-home.mts && node scripts/test-memory.mts && node scripts/test-shapes.mts && node scripts/test-maze.mts && node scripts/test-colouring.mts && node scripts/test-family.mts",
     "test:stats": "node scripts/test-stats.mts",
     "test:offline": "node scripts/test-offline.mts",
     "icons": "node scripts/make-icons.mjs"

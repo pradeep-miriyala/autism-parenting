@@ -24,6 +24,7 @@ export const PARENTING_GAMES = [
   'shapes',
   'maze',
   'colouring',
+  'family',
 ] as const
 export type PGame = (typeof PARENTING_GAMES)[number]
 
@@ -35,6 +36,7 @@ export const GAME_LABELS: Record<PGame, string> = {
   shapes: "Colours and Shapes",
   maze: "Maze",
   colouring: "Colour It In",
+  family: "Family Faces",
 }
 
 export const AGE_BANDS = ['u4', '5-6', '7-8', '9+'] as const

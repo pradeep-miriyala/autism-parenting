@@ -104,6 +104,10 @@ export function ShareIcon() {
   return <svg {...stroke}><path d="M12 15V4" /><path d="M8 8l4-4 4 4" /><path d="M5 13v6h14v-6" /></svg>
 }
 
+export function UsersIcon() {
+  return <svg {...stroke}><circle cx="9" cy="8" r="3.2" /><path d="M3 20c0-3.5 2.7-5.5 6-5.5s6 2 6 5.5" /><circle cx="17" cy="9" r="2.5" /><path d="M16 14.6c3 .2 5 1.9 5 5" /></svg>
+}
+
 export function ChatIcon() {
   return <svg {...stroke}><path d="M4 5h16v11H9l-5 4V5z" /><path d="M8 9.5h8M8 12.5h5" /></svg>
 }

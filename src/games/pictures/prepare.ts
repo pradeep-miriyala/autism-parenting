@@ -2,20 +2,24 @@
 // made no bigger than 1200 by 900 and saved as a JPEG. Drawing it again on a canvas also drops everything hidden
 // in the file, such as where the photo was taken. Everything here happens on the device.
 
-export const PHOTO_SIZE = { w: 1200, h: 900 }
-const RATIO = PHOTO_SIZE.w / PHOTO_SIZE.h
+/** Wide (4 by 3) is for the Jigsaw. Square is for faces. */
+export const PHOTO_SHAPES = { wide: { w: 1200, h: 900 }, square: { w: 600, h: 600 } } as const
+export type PhotoShape = keyof typeof PHOTO_SHAPES
+export const PHOTO_SIZE = PHOTO_SHAPES.wide
 
-/** The biggest 4 by 3 box that fits in a picture, taken from the middle. */
-export function cropBox(w: number, h: number): { sx: number; sy: number; sw: number; sh: number } {
+/** The biggest box of that shape that fits in a picture, taken from the middle. */
+export function cropBox(w: number, h: number, shape: PhotoShape = 'wide'): { sx: number; sy: number; sw: number; sh: number } {
+  const RATIO = PHOTO_SHAPES[shape].w / PHOTO_SHAPES[shape].h
   let sw = w, sh = w / RATIO
   if (sh > h) { sh = h; sw = h * RATIO }
   return { sx: (w - sw) / 2, sy: (h - sh) / 2, sw, sh }
 }
 
 /** How big the saved picture is: the crop, shrunk to fit, never made bigger. */
-export function outputSize(sw: number): { w: number; h: number } {
-  const w = Math.max(4, Math.min(PHOTO_SIZE.w, Math.floor(sw)))
-  return { w, h: Math.round(w / RATIO) }
+export function outputSize(sw: number, shape: PhotoShape = 'wide'): { w: number; h: number } {
+  const big = PHOTO_SHAPES[shape]
+  const w = Math.max(4, Math.min(big.w, Math.floor(sw)))
+  return { w, h: Math.round((w * big.h) / big.w) }
 }
 
 type Decoded = { src: CanvasImageSource; w: number; h: number; done: () => void }
@@ -39,12 +43,12 @@ async function decode(file: Blob): Promise<Decoded | null> {
 }
 
 /** Returns the ready picture, or null if the file could not be read as a picture. */
-export async function preparePhoto(file: Blob): Promise<Blob | null> {
+export async function preparePhoto(file: Blob, shape: PhotoShape = 'wide'): Promise<Blob | null> {
   const img = await decode(file)
   if (!img || img.w < 2 || img.h < 2) return null
   try {
-    const { sx, sy, sw, sh } = cropBox(img.w, img.h)
-    const out = outputSize(sw)
+    const { sx, sy, sw, sh } = cropBox(img.w, img.h, shape)
+    const out = outputSize(sw, shape)
     const canvas = document.createElement('canvas')
     canvas.width = out.w
     canvas.height = out.h

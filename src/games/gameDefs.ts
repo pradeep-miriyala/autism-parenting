@@ -12,6 +12,7 @@ export const ALL_GAME_IDS = [
   'shapes',
   'maze',
   'colouring',
+  'family',
 ] as const
 export type GameId = (typeof ALL_GAME_IDS)[number]
 
@@ -133,11 +134,12 @@ export function keyboardRows(locale: string): string[][] {
 }
 
 /** The games a child chooses from, in groups. A game appears once the screen for it exists. */
-export type GameGroupId = 'numbers' | 'thinking' | 'letters' | 'life'
+export type GameGroupId = 'numbers' | 'thinking' | 'letters' | 'people' | 'life'
 export const GAME_GROUPS: { id: GameGroupId; title: string; blurb: string; icon: string }[] = [
   { id: 'numbers', title: 'Numbers', blurb: 'Counting and number order', icon: '🔢' },
   { id: 'thinking', title: 'Thinking', blurb: 'Patterns, sorting, puzzles and matching', icon: '🧩' },
   { id: 'letters', title: 'Letters and writing', blurb: 'Words, letters and drawing', icon: '✏️' },
+  { id: 'people', title: 'Family and people', blurb: 'Faces, names and who is who', icon: '👨‍👩‍👧' },
   { id: 'life', title: 'Everyday life', blurb: 'Habits and routines', icon: '🏠' },
 ]
 
@@ -159,6 +161,7 @@ export const GAME_TILES: { id: GameId; group: GameGroupId; title: string; blurb:
   { id: 'shapes', group: 'thinking', title: "Colours and Shapes", blurb: "Find the colour or shape.", icon: '🔶' },
   { id: 'maze', group: 'thinking', title: "Maze", blurb: "Draw the way through.", icon: '🌀' },
   { id: 'colouring', group: 'letters', title: "Colour It In", blurb: "Paint the picture.", icon: '🖍️' },
+  { id: 'family', group: 'people', title: "Family Faces", blurb: "Who is who in my family.", icon: '👪' },
 ]
 
 /** Spot the Differences has no keys: its "length" is how many differences to find. */
@@ -224,6 +227,7 @@ export const GAME_SETTINGS: Record<GameId, { min: number; max: number; def: numb
   shapes: { min: 1, max: 3, def: 1, label: "Colours and shapes: how many to choose from (1 is three, 3 is six, asking colour and shape together)" },
   maze: { min: 1, max: 3, def: 1, label: "Maze: how big (1 is small, 3 is the biggest)" },
   colouring: { min: 1, max: 3, def: 1, label: "Colour it in: how many parts to paint (1 is a few big parts, 3 is many small ones)" },
+  family: { min: 1, max: 3, def: 1, label: "Family faces: 1 is \"Who is this?\", 2 is \"Where is...?\", 3 is the family map" },
 }
 
 export const isGameId = (x: unknown): x is GameId => (ALL_GAME_IDS as readonly string[]).includes(x as string)

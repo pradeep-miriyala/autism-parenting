@@ -21,6 +21,7 @@ export const PARENT_PAGES: { slug: string; title: string; blurb: string }[] = [
   { slug: 'settings', title: 'Game settings', blurb: 'Sound, how long rounds are, hints, tracing' },
   { slug: 'voice', title: 'Your voice', blurb: 'Record your own congratulations' },
   { slug: 'pictures', title: 'Your pictures', blurb: 'Add photos for the Jigsaw' },
+  { slug: 'family', title: 'Family pictures', blurb: 'Photos and names for Family Faces' },
   { slug: 'share', title: 'Share the app', blurb: 'Send Little Steps to another family' },
   { slug: 'feedback', title: 'Feedback', blurb: 'Tell the developer what works and what does not' },
   { slug: 'privacy', title: 'Privacy', blurb: 'What is counted, and what stays on this device' },

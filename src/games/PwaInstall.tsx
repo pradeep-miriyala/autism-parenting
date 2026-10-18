@@ -19,7 +19,7 @@ const DISMISS_KEY = 'pr-install-dismissed'
 const ROUTES_KEY = 'ls-pages-saved'
 const ROUTES_EVERY_MS = 7 * 24 * 3600 * 1000
 /** Every page of the app, for the worker to keep (see public/sw.js, which accepts only these shapes). */
-const APP_PAGES = ['/', '/stickers', '/about', '/copyright', '/parents', '/parents/child', '/parents/progress', '/parents/settings', '/parents/voice', '/parents/pictures', '/parents/share', '/parents/feedback',
+const APP_PAGES = ['/', '/stickers', '/about', '/copyright', '/parents', '/parents/child', '/parents/progress', '/parents/settings', '/parents/voice', '/parents/pictures', '/parents/family', '/parents/share', '/parents/feedback',
   '/parents/privacy', ...ALL_GAME_IDS.map(id => `/games/${id}`)]
 
 function isStandalone() {
