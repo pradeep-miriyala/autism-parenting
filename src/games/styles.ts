@@ -179,6 +179,14 @@ body:has(.sq-wrap.playmode){padding-top:.5rem}
 .mz-bump{stroke:var(--accent-3,#C0832B);stroke-width:7;stroke-linecap:round;pointer-events:none;animation:mz-bump .7s ease-out forwards}
 @keyframes mz-bump{from{stroke-opacity:1}to{stroke-opacity:0}}
 @media (prefers-reduced-motion:reduce){.mz-head,.mz-guide{animation:none}.mz-bump{animation:none;stroke-opacity:.6}}
+.cl-board{background:#fff;border:1px solid var(--line);margin:.5rem 0}
+.cl-board svg{display:block;width:100%;height:auto;touch-action:manipulation;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent;cursor:crosshair}
+.cl-palette{display:grid;grid-template-columns:repeat(6,1fr);gap:.45rem;max-width:380px;margin:.4rem auto}
+.cl-swatch{aspect-ratio:1;min-height:44px;border-radius:50%;border:3px solid #fff;outline:1px solid var(--line);cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.cl-swatch.on{border-color:var(--ink);outline:3px solid var(--accent)}
+.cl-swatch:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.cl-swatch:disabled{opacity:.5;cursor:default}
+.sq-actions .sq-btn:disabled{opacity:.45;cursor:default}
 /* Memory pairs: cards that turn over */
 .mm-grid{display:grid;gap:.6rem;width:100%;max-width:440px;margin:.5rem auto .6rem}
 .mm-card{position:relative;aspect-ratio:1 / 1;padding:0;border:0;background:none;cursor:pointer;perspective:700px;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
@@ -509,6 +517,13 @@ body:has(.sq-wrap.playmode){padding-top:.5rem}
   .sq-wrap.maze .sq-top{grid-column:2;grid-row:1}
   .sq-wrap.maze .sq-msg{grid-column:2;grid-row:3}
   .sq-wrap.maze .sq-actions{grid-column:2;grid-row:4}
+  .sq-wrap.colouring .th-card{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:.2rem 1rem;align-items:center}
+  .sq-wrap.colouring .cl-board{grid-column:1;grid-row:1 / span 4;margin:0 auto;width:min(100%, calc((100svh - 76px) * 1.333))}
+  .sq-wrap.colouring .sq-top{grid-column:2;grid-row:1}
+  .sq-wrap.colouring .cl-palette{grid-column:2;grid-row:2;grid-template-columns:repeat(6,1fr);gap:.3rem;margin:0}
+  .sq-wrap.colouring .cl-swatch{min-height:30px}
+  .sq-wrap.colouring .sq-msg{grid-column:2;grid-row:3}
+  .sq-wrap.colouring .sq-actions{grid-column:2;grid-row:4}
   .sq-wrap.memory .th-card{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:.2rem 1rem;align-items:center}
   .sq-wrap.memory .mm-grid{grid-column:1;grid-row:1 / span 4;margin:0 auto;gap:.35rem;max-width:none;width:min(100%, calc((100svh - 76px) * var(--mm-ratio-n, 1.2)))}
   .sq-wrap.memory .sq-top{grid-column:2;grid-row:1}

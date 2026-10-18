@@ -55,6 +55,7 @@ export function startingLengths(age: number): Record<GameId, number> {
     memory: by(1, 1, 2, 3),
     shapes: by(1, 1, 2, 3),
     maze: by(1, 1, 2, 3),
+    colouring: by(1, 1, 2, 3),
   }
 }
 

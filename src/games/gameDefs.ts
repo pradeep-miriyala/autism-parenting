@@ -11,6 +11,7 @@ export const ALL_GAME_IDS = [
   'memory',
   'shapes',
   'maze',
+  'colouring',
 ] as const
 export type GameId = (typeof ALL_GAME_IDS)[number]
 
@@ -157,6 +158,7 @@ export const GAME_TILES: { id: GameId; group: GameGroupId; title: string; blurb:
   { id: 'memory', group: 'thinking', title: "Memory Pairs", blurb: "Find the matching cards.", icon: '🃏' },
   { id: 'shapes', group: 'thinking', title: "Colours and Shapes", blurb: "Find the colour or shape.", icon: '🔶' },
   { id: 'maze', group: 'thinking', title: "Maze", blurb: "Draw the way through.", icon: '🌀' },
+  { id: 'colouring', group: 'letters', title: "Colour It In", blurb: "Paint the picture.", icon: '🖍️' },
 ]
 
 /** Spot the Differences has no keys: its "length" is how many differences to find. */
@@ -221,6 +223,7 @@ export const GAME_SETTINGS: Record<GameId, { min: number; max: number; def: numb
   memory: { min: 1, max: 3, def: 1, label: "Memory pairs: how many cards (1 is six, 3 is sixteen)" },
   shapes: { min: 1, max: 3, def: 1, label: "Colours and shapes: how many to choose from (1 is three, 3 is six, asking colour and shape together)" },
   maze: { min: 1, max: 3, def: 1, label: "Maze: how big (1 is small, 3 is the biggest)" },
+  colouring: { min: 1, max: 3, def: 1, label: "Colour it in: how many parts to paint (1 is a few big parts, 3 is many small ones)" },
 }
 
 export const isGameId = (x: unknown): x is GameId => (ALL_GAME_IDS as readonly string[]).includes(x as string)
