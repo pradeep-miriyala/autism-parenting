@@ -1,32 +1,42 @@
 'use client'
 // Family faces: the people a parent added, as photos with the names the child uses for them.
-//   level 1  "Who is this?"   a photo, and names to choose from
-//   level 2  "Where is Amma?" a name (or "Which one is your mother?"), and photos to choose from
+//   level 1  "Who is this?"   a photo, and pictures of who it might be (mother, father, grandfather ...)
+//   level 2  "Where is Amma?" a picture and a name, and photos to choose from
 //   level 3  the family map   drag or tap each photo to the place for what that person is: grandparents, parents, ...
+// Everything a child needs to understand is a picture, not a word: each relation has its own icon. A word is only ever
+// heard when the child presses a speaker button, and then only that word is said (even with the sound setting off).
 // The photos and names stay on this device (family/store.ts). No timer, no score. A wrong choice buzzes and shakes;
 // nothing is lost. If the child is stuck, the right one gently pulses.
 import Link from 'next/link'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import {
-  FAMILY_QUESTIONS, MIN_FAMILY, ROW_LABELS, ROW_ORDER, familyLevel, fits, makeFamilyMap, makeFamilyQuestions, relationLabel,
+  FAMILY_QUESTIONS, MIN_FAMILY, ROW_ICONS, ROW_LABELS, ROW_ORDER, familyLevel, fits, makeFamilyMap, makeFamilyQuestions, relationIcon, relationLabel,
   type FamilyMap, type FamilyQuestion, type MapSlot, type Person,
 } from './family/logic'
 import { listPeople, type StoredPerson } from './family/store'
 import { SprinklesLayer, useSprinkles } from './sprinkles'
 import { useFeedback } from './feedback'
 import { useStuck } from './useStuck'
+import { SpeakerIcon } from './icons'
 import InfoButton from './InfoButton'
 import { celebration, isYoung, sprinklePalette, type Profile } from './profile'
 
 const SETTLE_MS = 1200
 const REACH = 14
 
-/** "That is Amma, your mother." */
-function introduce(p: Person) {
-  if (p.relation === 'me') return `That is you, ${p.name}.`
-  if (p.relation === 'other') return `That is ${p.name}.`
-  return `That is ${p.name}, your ${relationLabel(p.relation).toLowerCase()}.`
+/** A speaker button: says just this one word, whether or not the sound setting is on, and does nothing else. */
+function Speak({ word, say, big }: { word: string; say: (text: string, force?: boolean) => void; big?: boolean }) {
+  return (
+    <button type="button" className={`fm-say${big ? ' big' : ''}`} aria-label={`Hear the word: ${word}`}
+      onClick={e => { e.stopPropagation(); say(word, true) }}
+      onPointerDown={e => e.stopPropagation()}>
+      <SpeakerIcon />
+    </button>
+  )
 }
+
+/** What shows when the right one is chosen: the picture and the name, no sentence. */
+const found = (p: Person) => `${relationIcon(p.relation)} ${p.name}`
 
 export default function FamilyGame({ level, sound, profile, sprinklesOn, hintSec, onActive, onDone }: {
   level: number
@@ -102,8 +112,6 @@ export default function FamilyGame({ level, sound, profile, sprinklesOn, hintSec
   const placedCount = Object.keys(placed).length
   useEffect(() => { onActive?.(!done && (qi > 0 || placedCount > 0)) }, [done, qi, placedCount, onActive])
   useEffect(() => () => onActive?.(false), [onActive])
-  // each new question is read out
-  useEffect(() => { if (q && !settling) say(q.ask === 'photo' ? 'Who is this?' : q.prompt) }, [qi, q?.prompt]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const loose = map ? map.people.filter(id => !Object.values(placed).includes(id)) : []
   const stuck = useStuck(enough && !done && !settling, hintSec, misses, `${qi}:${placedCount}:${shake.n}:${selected}`)
@@ -136,11 +144,12 @@ export default function FamilyGame({ level, sound, profile, sprinklesOn, hintSec
     ding()
     setMisses(0)
     setSettling(true)
-    const sentence = introduce(byId.get(id)!)
-    setMessage(sentence)
-    say(sentence)
+    const who = byId.get(id)!
+    setMessage(found(who))
+    say(who.name)
     if (qi + 1 < questions.length) {
-      timer.current = setTimeout(() => { setQi(i => i + 1); setSettling(false); setMessage('') }, SETTLE_MS + 400)
+      // the next question starts clean: nothing left shaking from the last one
+      timer.current = setTimeout(() => { setQi(i => i + 1); setSettling(false); setMessage(''); setShake({ n: 0, at: '' }) }, SETTLE_MS + 400)
       return
     }
     finish()
@@ -161,8 +170,8 @@ export default function FamilyGame({ level, sound, profile, sprinklesOn, hintSec
     setSelected(null)
     const next = { ...placed, [slot.key]: id }
     setPlaced(next)
-    setMessage(introduce(p))
-    say(introduce(p))
+    setMessage(found(p))
+    say(p.name)
     if (map && Object.keys(next).length === map.slots.length) finish()
   }
 
@@ -230,36 +239,53 @@ export default function FamilyGame({ level, sound, profile, sprinklesOn, hintSec
             {Array.from({ length: total }, (_, i) => <span key={i} className={(lv === 3 ? i < placedCount : i < qi) || done ? 'on' : ''} />)}
           </div>
         </div>
-        <InfoButton say={say} text={lv === 1 ? 'Look at the photo, then tap the name of the person.' : lv === 2 ? 'Read the question, then tap the right photo.' : 'Put each photo in the right place on the family map. Drag it there, or tap the photo and then the place.'} />
+        <InfoButton say={say} text={lv === 1 ? 'Look at the photo. Tap the picture of who it is. Tap a speaker to hear that word.' : lv === 2 ? 'Tap the speaker to hear the word. Then tap the photo of that person.' : 'Put each photo in the right place on the family map. Drag it there, or tap the photo and then the place. Tap a speaker to hear that word.'} />
       </div>
 
       {lv === 1 && q && (
         <>
           <div className="fm-photo"><img src={urls[q.answer]} alt="" /></div>
-          <div className="fm-names" role="group" aria-label="Who is this?">
-            {q.options.map(id => (
-              <button key={`${qi}-${id}-${shake.at === String(id) ? shake.n : 0}`} type="button"
-                className={`fm-name${hintOption === id ? ' hint' : ''}${shake.n > 0 && shake.at === String(id) ? ' shake' : ''}${settling && id === q.answer ? ' right' : ''}`}
-                disabled={settling && id !== q.answer} onClick={() => choose(id)}>{byId.get(id)!.name}</button>
-            ))}
+          <div className="fm-opts" role="group" aria-label="Who is this?">
+            {q.options.map(id => {
+              const p = byId.get(id)!
+              return (
+                <div key={`${qi}-${id}-${shake.at === String(id) ? shake.n : 0}`} className="fm-opt">
+                  <button type="button" aria-label={`${p.name}, ${relationLabel(p.relation)}`}
+                    className={`fm-opt-main${hintOption === id ? ' hint' : ''}${shake.n > 0 && shake.at === String(id) ? ' shake' : ''}${settling && id === q.answer ? ' right' : ''}`}
+                    disabled={settling && id !== q.answer} onClick={() => choose(id)}>
+                    <span className="fm-icon" aria-hidden="true">{relationIcon(p.relation)}</span>
+                    <span className="fm-word">{p.name}</span>
+                  </button>
+                  <Speak word={p.name} say={say} />
+                </div>
+              )
+            })}
           </div>
         </>
       )}
 
-      {lv === 2 && q && (
-        <>
-          <p className="cs-prompt">{q.prompt}</p>
-          <div className="fm-pics" role="group" aria-label={q.prompt}>
-            {q.options.map((id, i) => (
-              <button key={`${qi}-${id}-${shake.at === String(id) ? shake.n : 0}`} type="button" aria-label={`Photo ${i + 1}`}
-                className={`fm-pic${hintOption === id ? ' hint' : ''}${shake.n > 0 && shake.at === String(id) ? ' shake' : ''}${settling && id === q.answer ? ' right' : ''}`}
-                disabled={settling && id !== q.answer} onClick={() => choose(id)}>
-                <img src={urls[id]} alt="" />
-              </button>
-            ))}
-          </div>
-        </>
-      )}
+      {lv === 2 && q && (() => {
+        const target = byId.get(q.answer)!
+        const word = q.ask === 'relation' ? relationLabel(target.relation) : target.name
+        return (
+          <>
+            <div className="fm-ask" role="group" aria-label={q.prompt}>
+              <Speak word={word} say={say} big />
+              <span className="fm-icon big" aria-hidden="true">{relationIcon(target.relation)}</span>
+              <span className="fm-askword">{word}</span>
+            </div>
+            <div className="fm-pics" role="group" aria-label={q.prompt}>
+              {q.options.map((id, i) => (
+                <button key={`${qi}-${id}-${shake.at === String(id) ? shake.n : 0}`} type="button" aria-label={`Photo ${i + 1}`}
+                  className={`fm-pic${hintOption === id ? ' hint' : ''}${shake.n > 0 && shake.at === String(id) ? ' shake' : ''}${settling && id === q.answer ? ' right' : ''}`}
+                  disabled={settling && id !== q.answer} onClick={() => choose(id)}>
+                  <img src={urls[id]} alt="" />
+                </button>
+              ))}
+            </div>
+          </>
+        )
+      })()}
 
       {lv === 3 && map && (
         <>
@@ -269,17 +295,21 @@ export default function FamilyGame({ level, sound, profile, sprinklesOn, hintSec
               if (!slots.length) return null
               return (
                 <div key={row} className="fm-maprow">
-                  <div className="fm-rowname">{ROW_LABELS[row]}</div>
+                  <div className="fm-rowname" role="img" aria-label={ROW_LABELS[row]}>{ROW_ICONS[row]}</div>
                   <div className="fm-row">
                     {slots.map(s => {
                       const who = placed[s.key]
                       return (
-                        <div key={`${s.key}-${shake.at === s.key ? shake.n : 0}`} ref={el => { slotRefs.current[s.key] = el }} role="button"
-                          aria-label={who !== undefined ? `${s.label}: ${byId.get(who)!.name}` : `${s.label}, empty`}
-                          className={`fm-slot${who !== undefined ? ' filled' : ''}${drag?.over === s.key ? ' over' : ''}${hintSlot === s.key ? ' hint' : ''}${shake.n > 0 && shake.at === s.key ? ' shake' : ''}`}
-                          onClick={() => { if (selected !== null && who === undefined) put(selected, s) }}>
-                          {who !== undefined ? <img src={urls[who]} alt="" /> : <span className="fm-slot-hole" aria-hidden="true">?</span>}
-                          <span className="fm-slot-label">{who !== undefined ? byId.get(who)!.name : s.label}</span>
+                        <div key={`${s.key}-${shake.at === s.key ? shake.n : 0}`} className="fm-slotwrap">
+                          <div ref={el => { slotRefs.current[s.key] = el }} role="button"
+                            aria-label={who !== undefined ? `${s.label}: ${byId.get(who)!.name}` : `${s.label}, empty`}
+                            className={`fm-slot${who !== undefined ? ' filled' : ''}${drag?.over === s.key ? ' over' : ''}${hintSlot === s.key ? ' hint' : ''}${shake.n > 0 && shake.at === s.key ? ' shake' : ''}`}
+                            onClick={() => { if (selected !== null && who === undefined) put(selected, s) }}>
+                            {who !== undefined
+                              ? <><img src={urls[who]} alt="" /><span className="fm-slot-label">{byId.get(who)!.name}</span></>
+                              : <span className="fm-slot-hole" aria-hidden="true"><span className="fm-icon">{relationIcon(s.relation)}</span></span>}
+                          </div>
+                          <Speak word={who !== undefined ? byId.get(who)!.name : s.label} say={say} />
                         </div>
                       )
                     })}

@@ -21,6 +21,18 @@ export const ROW_LABELS: Record<RelationRow, string> = {
   grand: 'Grandparents', parent: 'Parents, aunts and uncles', me: 'Me, brothers, sisters and cousins', other: 'Friends and others',
 }
 
+/**
+ * A picture for each relation, so a child who cannot read yet can still tell "mother" from "grandfather". Each is
+ * different from every other, because two choices that look the same cannot be told apart.
+ */
+export const RELATION_ICONS: Record<string, string> = {
+  grandmother: '👵', grandfather: '👴', mother: '👩', father: '👨', aunt: '👩‍🦰', uncle: '👨‍🦰',
+  me: '🧒', brother: '👦', sister: '👧', cousin: '🧑', friend: '🧑‍🤝‍🧑', teacher: '🧑‍🏫', other: '💛',
+}
+/** One picture for each row of the family map. */
+export const ROW_ICONS: Record<RelationRow, string> = { grand: '👵👴', parent: '👩👨', me: '🧒', other: '🧑‍🤝‍🧑' }
+export const relationIcon = (id: string) => RELATION_ICONS[id] ?? RELATION_ICONS.other
+
 export const isRelation = (x: unknown): x is string => typeof x === 'string' && RELATIONS.some(r => r.id === x)
 export const cleanRelation = (x: unknown): string => (isRelation(x) ? x : 'other')
 export const relationLabel = (id: string) => RELATIONS.find(r => r.id === id)?.label ?? 'Someone special'
@@ -90,10 +102,16 @@ export function makeFamilyQuestions(level: number, people: readonly Person[], ra
   const lv = familyLevel(level)
   return targets(people, FAMILY_QUESTIONS, rand).map(t => {
     if (lv === 1) {
-      // who is this? The names to choose from are all different, and none is the same as the right one
-      const others = shuffled(people.filter(p => p.id !== t.id && !sameName(p.name, t.name)), rand)
+      // who is this? Each choice is shown with the picture for what that person is, so the choices are all
+      // different relations (and names) wherever the family allows it. Only when everyone else is the same relation
+      // as the right one are they told apart by name alone.
+      const pool = shuffled(people.filter(p => p.id !== t.id && !sameName(p.name, t.name)), rand)
       const chosen: Person[] = []
-      for (const p of others) if (chosen.length < NAME_CHOICES - 1 && !chosen.some(c => sameName(c.name, p.name))) chosen.push(p)
+      for (const p of pool) {
+        if (chosen.length >= NAME_CHOICES - 1) break
+        if (p.relation !== t.relation && !chosen.some(c => c.relation === p.relation || sameName(c.name, p.name))) chosen.push(p)
+      }
+      if (!chosen.length) for (const p of pool) if (chosen.length < NAME_CHOICES - 1 && !chosen.some(c => sameName(c.name, p.name))) chosen.push(p)
       const options = shuffled([t, ...chosen], rand).map(p => p.id)
       return { mode: 'name', ask: 'photo', prompt: 'Who is this?', options, answer: t.id } as FamilyQuestion
     }

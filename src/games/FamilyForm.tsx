@@ -6,7 +6,7 @@
 import Link from 'next/link'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { MAX_PEOPLE, deletePerson, freePlace, listPeople, savePerson, type StoredPerson } from './family/store'
-import { MIN_FAMILY, RELATIONS, cleanPersonName, cleanRelation, relationLabel, sameName, MAX_NAME } from './family/logic'
+import { MIN_FAMILY, RELATIONS, cleanPersonName, cleanRelation, relationIcon, sameName, MAX_NAME } from './family/logic'
 import { preparePhoto } from './pictures/prepare'
 
 function PersonRow({ person, url, others, busy, onSave, onDelete }: {
@@ -41,7 +41,7 @@ function PersonRow({ person, url, others, busy, onSave, onDelete }: {
         <label className="sq-note fa-label" htmlFor={`fa-r-${person.slot}`}>They are the child’s</label>
         <select id={`fa-r-${person.slot}`} className="fb-line" value={person.relation} disabled={busy}
           onChange={e => onSave({ ...person, relation: cleanRelation(e.target.value) })}>
-          {RELATIONS.map(r => <option key={r.id} value={r.id}>{r.label}</option>)}
+          {RELATIONS.map(r => <option key={r.id} value={r.id}>{relationIcon(r.id)}  {r.label}</option>)}
         </select>
         {problem && <p className="sq-note vc-error" role="alert">{problem}</p>}
         <button type="button" className="sq-btn" disabled={busy} onClick={() => { if (!sure) setSure(true); else onDelete(person.slot) }}>
@@ -142,7 +142,7 @@ export default function FamilyForm() {
         <input id="fa-name" className="fb-line" value={name} maxLength={MAX_NAME} placeholder="Amma" disabled={busy || full} onChange={e => setName(e.target.value)} />
         <label className="sq-note fa-label" htmlFor="fa-relation">They are your child’s</label>
         <select id="fa-relation" className="fb-line" value={relation} disabled={busy || full} onChange={e => setRelation(e.target.value)}>
-          {RELATIONS.map(r => <option key={r.id} value={r.id}>{r.label}</option>)}
+          {RELATIONS.map(r => <option key={r.id} value={r.id}>{relationIcon(r.id)}  {r.label}</option>)}
         </select>
 
         {error && <p className="sq-note vc-error" role="alert">{error}</p>}

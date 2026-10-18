@@ -6,8 +6,8 @@
 //     node scripts/test-family.mts
 
 import {
-  FAMILY_QUESTIONS, MAP_PEOPLE, MIN_FAMILY, NAME_CHOICES, PHOTO_CHOICES, RELATIONS, ROW_LABELS, ROW_ORDER, askable, cleanPersonName, cleanRelation,
-  familyLevel, fits, isRelation, makeFamilyMap, makeFamilyQuestions, relationLabel, relationRow, sameName, type Person,
+  FAMILY_QUESTIONS, MAP_PEOPLE, MIN_FAMILY, NAME_CHOICES, PHOTO_CHOICES, RELATIONS, RELATION_ICONS, ROW_ICONS, ROW_LABELS, ROW_ORDER, askable, cleanPersonName, cleanRelation,
+  familyLevel, fits, isRelation, relationIcon, makeFamilyMap, makeFamilyQuestions, relationLabel, relationRow, sameName, type Person,
 } from '../src/games/family/logic.ts'
 import { MAX_PEOPLE, freePlace } from '../src/games/family/store.ts'
 import { PHOTO_SHAPES, cropBox, outputSize } from '../src/games/pictures/prepare.ts'
@@ -20,6 +20,12 @@ const check = (ok: boolean, what: string) => { if (!ok && failed++ < 25) console
 check(RELATIONS.length === 13 && new Set(RELATIONS.map(r => r.id)).size === 13 && new Set(RELATIONS.map(r => r.label)).size === 13, 'thirteen relations, each different')
 check(RELATIONS.every(r => ROW_ORDER.includes(r.row) && ROW_LABELS[r.row].length > 4 && r.label.length > 1), 'every relation has a row on the map and a label')
 check(ROW_ORDER.every(row => RELATIONS.some(r => r.row === row)), 'every row of the map is used')
+// pictures instead of words
+check(RELATIONS.every(r => (RELATION_ICONS[r.id] ?? '').length >= 2), 'every relation has a picture')
+check(new Set(RELATIONS.map(r => RELATION_ICONS[r.id])).size === RELATIONS.length, 'no two relations share a picture, so two choices are never alike')
+check(Object.keys(RELATION_ICONS).length === RELATIONS.length && Object.keys(RELATION_ICONS).every(k => isRelation(k)), 'pictures only for relations that exist')
+check(ROW_ORDER.every(row => (ROW_ICONS[row] ?? '').length >= 2) && new Set(ROW_ORDER.map(r => ROW_ICONS[r])).size === ROW_ORDER.length, 'every row of the map has its own picture')
+check(relationIcon('mother') === RELATION_ICONS.mother && relationIcon('zzz') === RELATION_ICONS.other && relationIcon('') === RELATION_ICONS.other, 'an unknown relation gets the "someone special" picture')
 check(isRelation('mother') && !isRelation('nonsense') && !isRelation(5) && !isRelation(null), 'which are relations')
 check(cleanRelation('uncle') === 'uncle' && cleanRelation('x') === 'other' && cleanRelation(undefined) === 'other', 'a damaged relation becomes "someone special"')
 check(relationLabel('grandmother') === 'Grandmother' && relationLabel('zzz') === 'Someone special' && relationRow('mother') === 'parent' && relationRow('zzz') === 'other', 'labels and rows')
@@ -58,6 +64,11 @@ for (let s = 1; s <= 400; s++) {
         const names = q.options.map(id => byId.get(id)!.name)
         check(new Set(names.map(x => x.toLocaleLowerCase())).size === names.length, `${t}: two choices with the same name (${names})`)
         check(q.prompt === 'Who is this?' && q.ask === 'photo', `${t}: asks who it is`)
+        // each choice is shown as the picture for what the person is, so no two choices may share one, if the family has others
+        const differentOthers = people.some(p => p.id !== right.id && p.relation !== right.relation && !sameName(p.name, right.name))
+        const rels = q.options.map(id => byId.get(id)!.relation)
+        if (differentOthers) check(new Set(rels).size === rels.length, `${t}: two choices with the same picture (${rels})`)
+        else check(rels.filter(r => r === right.relation).length >= 1, `${t}: the right one is there`)
       } else {
         if (q.ask === 'name') check(q.prompt === `Where is ${right.name}?`, `${t}: asks for the right name`)
         else {
