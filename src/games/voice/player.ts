@@ -65,12 +65,16 @@ async function start(c: AudioContext, buffer: AudioBuffer, afterMs: number) {
   src.start(c.currentTime + Math.max(0, afterMs) / 1000)
 }
 
-/** Play a recording (the parent listening back before keeping it). */
+const blobBuffers = new WeakMap<Blob, AudioBuffer>()
+
+/** Play a recording (the parent listening back, or a family member's name). It is remembered once decoded, so a short clip plays at once the next time. */
 export async function playBlob(blob: Blob): Promise<boolean> {
   try {
     const c = await ready()
     if (!c) return false
-    await start(c, await decode(c, await blob.arrayBuffer()), 0)
+    let buffer = blobBuffers.get(blob)
+    if (!buffer) { buffer = await decode(c, await blob.arrayBuffer()); blobBuffers.set(blob, buffer) }
+    await start(c, buffer, 0)
     return true
   } catch { return false }
 }

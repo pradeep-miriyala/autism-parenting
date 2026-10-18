@@ -87,7 +87,7 @@ inside the game (`GameScreen.tsx`) carries the controls, so the game keeps the r
 | Colours and Shapes | Taps the one that fits: "Find the red one.", "Find the circle.", "Find the blue triangle." | 5 questions; 3, 4 or 6 choices. Level 1 changes one thing at a time, level 2 changes both but asks about one, level 3 asks about both with look-alikes. Every question has exactly one right answer (`makeShapesRound` in `thinking/rounds.ts`) |
 | Maze | Draws a line with a finger from the start (an animal) to the end (its food) through a maze | 4 by 3, 5 by 4 or 8 by 6 cells. Every maze has exactly one way through and no loops. The line follows the finger as far as there are passages and stops at a wall, which glows; nothing buzzes. Press the end of the line to carry on, press anywhere on it to go back to that place, or tap the next cell for a single step. If stuck, a dotted line shows the way on, or the way back out of a dead end (`maze/maze.ts`) |
 | Colour It In | Picks a colour and touches a part of a picture to paint it, or drags a finger across several | 10 pictures drawn in code as shapes (5 to 12 parts; level 1 uses the three simplest, level 3 all ten), 12 colours. Nothing can go wrong: Undo takes back the last stroke, white takes a colour off, Start again can itself be undone. "I am finished" ends the round and earns a sticker (`colouring/pictures.ts`) |
-| Family Faces | Level 1: "Who is this?" (a photo, three names). Level 2: "Where is Amma?" or "Which one is your mother?" (four photos). Level 3: the family map, dragging each photo to the place for what that person is (grandparents, parents, the child and brothers and sisters, friends) | Uses the people a parent adds on *For parents → Family pictures*; needs at least two. Every question has exactly one right answer even if two people share a relation or look-alike names (`family/logic.ts`). With fewer than two people the game says to ask a grown-up |
+| Family Faces | Level 1: "Who is this?" (a photo, and a picture for each choice: mother, father, grandfather and so on). Level 2: a picture and a word ("Amma", or "Mother"), then four photos. Level 3: the family map, dragging each photo to the place for what that person is (grandparents, parents, the child and brothers and sisters, friends) | Built on pictures, not words: every relation has its own icon (`RELATION_ICONS` in `family/logic.ts`, no two alike), the empty places on the map show the icon of who goes there, and the rows are pictures. A **speaker button** next to a word says just that one word, even with the sound setting off; nothing is read aloud by itself. A person's name is played from the parent's own recording if they made one, otherwise (or if the recording cannot be played) in the computer voice; relation words ("Mother") use the computer voice. A right answer shows the icon and the name, not a sentence. Uses the people a parent adds on *For parents → Family pictures*; needs at least two. Every question has exactly one right answer, and the choices in level 1 are different relations so no two look alike (`family/logic.ts`) |
 | Helpful Habits | A card shows something a child does; drag it to "Helps me" or "Does not help me" (or tap the bucket) | 28 cards; 3–10 per round; right = sparkle and a sentence ("Brushing my teeth helps me."); wrong = buzz and the card slides back; no "good"/"bad" wording |
 
 The home screen groups the games (Numbers, Thinking, Letters and writing, Everyday life) in `GAME_GROUPS` and
@@ -175,8 +175,12 @@ file that `scripts/test-thinking.mts` runs thousands of rounds of.
   square and shrunk to 600 by 600 on the device, hidden details dropped), the name the child uses ("Amma", "Uncle Ravi",
   letters only, up to 24) and what they are to the child (mother, father, grandmother, brother, friend and so on). Two people
   cannot have names that look the same, because a child could not tell the choices apart. The name and relation can be
-  changed later, and delete takes two taps. Everything is kept in IndexedDB on that device only (`family/store.ts`), never
-  uploaded and never counted; the page, the Privacy page, About and Copyright all say so. Only the game's id is ever counted.
+  changed later, and delete takes two taps. A parent can also **record themselves saying the name** (up to 4 seconds), when
+  adding the person or later (`NameVoice` in `FamilyForm.tsx`, `voice/useRecorder.ts`), because the computer voice may say
+  a family name oddly. The microphone is asked for only when Record is pressed and let go when it stops; a recording can be
+  listened to, redone or removed, and a damaged one is ignored without losing the person (`cleanPerson` in `family/store.ts`).
+  Everything is kept in IndexedDB on that device only, never uploaded and never counted; the page, the Privacy page, About
+  and Copyright all say so. Only the game's id is ever counted.
 - **Stickers.** Each finished round earns one of 30 stickers, chosen at random, shown in an album the
   child can open. Nothing is ever taken away; an unfinished round earns nothing.
 - **Parent summary.** *For parents → This week*: rounds finished in the last 7 days (a small bar chart and a
@@ -244,7 +248,7 @@ src/games/
 ├── VoiceSettings.tsx · voice/ (store.ts IndexedDB, player.ts Web Audio, pick.ts which clip)
 ├── PicturesSettings.tsx · JigsawGame.tsx (photo or drawn, each round) · PhotoJigsaw.tsx
 ├── MemoryGame.tsx · memory/logic.ts (cards, turning, hints) · ShapesGame.tsx · MazeGame.tsx · maze/maze.ts (maze, way through, walking the line) · ColouringGame.tsx · colouring/pictures.ts (pictures as shapes, colours)
-├── FamilyGame.tsx · FamilyForm.tsx · family/ (logic.ts relations, questions and map; store.ts IndexedDB)
+├── FamilyGame.tsx · FamilyForm.tsx · family/ (logic.ts relations, questions and map; store.ts IndexedDB) · voice/useRecorder.ts
 ├── ShareApp.tsx · share/share.ts (message, links, QR) · FeedbackForm.tsx
 ├── pictures/ cut.ts (the cut and the table) · prepare.ts (crop and shrink) · store.ts (IndexedDB) · prefs.ts (choices, next picture)
 ├── feedback.ts (voice, ding, buzz, chime) · sprinkles.tsx · useStuck.ts

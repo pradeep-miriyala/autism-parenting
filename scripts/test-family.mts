@@ -6,10 +6,10 @@
 //     node scripts/test-family.mts
 
 import {
-  FAMILY_QUESTIONS, MAP_PEOPLE, MIN_FAMILY, NAME_CHOICES, PHOTO_CHOICES, RELATIONS, ROW_LABELS, ROW_ORDER, askable, cleanPersonName, cleanRelation,
-  familyLevel, fits, isRelation, makeFamilyMap, makeFamilyQuestions, relationLabel, relationRow, sameName, type Person,
+  FAMILY_QUESTIONS, MAP_PEOPLE, MIN_FAMILY, NAME_CHOICES, NAME_VOICE_MIN_MS, NAME_VOICE_SECONDS, PHOTO_CHOICES, RELATIONS, RELATION_ICONS, ROW_ICONS, ROW_LABELS, ROW_ORDER, askable, cleanPersonName, cleanRelation,
+  familyLevel, fits, isRelation, relationIcon, makeFamilyMap, makeFamilyQuestions, relationLabel, relationRow, sameName, type Person,
 } from '../src/games/family/logic.ts'
-import { MAX_PEOPLE, freePlace } from '../src/games/family/store.ts'
+import { MAX_PEOPLE, cleanPerson, freePlace } from '../src/games/family/store.ts'
 import { PHOTO_SHAPES, cropBox, outputSize } from '../src/games/pictures/prepare.ts'
 import { seeded } from '../src/games/spot/generate.ts'
 
@@ -20,6 +20,12 @@ const check = (ok: boolean, what: string) => { if (!ok && failed++ < 25) console
 check(RELATIONS.length === 13 && new Set(RELATIONS.map(r => r.id)).size === 13 && new Set(RELATIONS.map(r => r.label)).size === 13, 'thirteen relations, each different')
 check(RELATIONS.every(r => ROW_ORDER.includes(r.row) && ROW_LABELS[r.row].length > 4 && r.label.length > 1), 'every relation has a row on the map and a label')
 check(ROW_ORDER.every(row => RELATIONS.some(r => r.row === row)), 'every row of the map is used')
+// pictures instead of words
+check(RELATIONS.every(r => (RELATION_ICONS[r.id] ?? '').length >= 2), 'every relation has a picture')
+check(new Set(RELATIONS.map(r => RELATION_ICONS[r.id])).size === RELATIONS.length, 'no two relations share a picture, so two choices are never alike')
+check(Object.keys(RELATION_ICONS).length === RELATIONS.length && Object.keys(RELATION_ICONS).every(k => isRelation(k)), 'pictures only for relations that exist')
+check(ROW_ORDER.every(row => (ROW_ICONS[row] ?? '').length >= 2) && new Set(ROW_ORDER.map(r => ROW_ICONS[r])).size === ROW_ORDER.length, 'every row of the map has its own picture')
+check(relationIcon('mother') === RELATION_ICONS.mother && relationIcon('zzz') === RELATION_ICONS.other && relationIcon('') === RELATION_ICONS.other, 'an unknown relation gets the "someone special" picture')
 check(isRelation('mother') && !isRelation('nonsense') && !isRelation(5) && !isRelation(null), 'which are relations')
 check(cleanRelation('uncle') === 'uncle' && cleanRelation('x') === 'other' && cleanRelation(undefined) === 'other', 'a damaged relation becomes "someone special"')
 check(relationLabel('grandmother') === 'Grandmother' && relationLabel('zzz') === 'Someone special' && relationRow('mother') === 'parent' && relationRow('zzz') === 'other', 'labels and rows')
@@ -58,6 +64,11 @@ for (let s = 1; s <= 400; s++) {
         const names = q.options.map(id => byId.get(id)!.name)
         check(new Set(names.map(x => x.toLocaleLowerCase())).size === names.length, `${t}: two choices with the same name (${names})`)
         check(q.prompt === 'Who is this?' && q.ask === 'photo', `${t}: asks who it is`)
+        // each choice is shown as the picture for what the person is, so no two choices may share one, if the family has others
+        const differentOthers = people.some(p => p.id !== right.id && p.relation !== right.relation && !sameName(p.name, right.name))
+        const rels = q.options.map(id => byId.get(id)!.relation)
+        if (differentOthers) check(new Set(rels).size === rels.length, `${t}: two choices with the same picture (${rels})`)
+        else check(rels.filter(r => r === right.relation).length >= 1, `${t}: the right one is there`)
       } else {
         if (q.ask === 'name') check(q.prompt === `Where is ${right.name}?`, `${t}: asks for the right name`)
         else {
@@ -117,6 +128,32 @@ check(familyLevel(0) === 1 && familyLevel(9) === 3 && familyLevel(2.4) === 2, 'a
 // ── The places for people ──
 check(MAX_PEOPLE === 12, 'twelve people at most')
 check(freePlace([]) === 0 && freePlace([{ slot: 0 }, { slot: 1 }]) === 2 && freePlace([{ slot: 1 }]) === 0 && freePlace(Array.from({ length: 12 }, (_, slot) => ({ slot }))) === null, 'the first empty place is used; none when full')
+
+// ── A person's saved record, with or without a recording of their name ──
+{
+  const photo = new Blob(['photo'], { type: 'image/jpeg' }), clip = new Blob(['sound'], { type: 'audio/webm' })
+  const base = { slot: 3, name: 'Amma', relation: 'mother', blob: photo, at: 1234 }
+  const plain = cleanPerson(base)
+  check(!!plain && plain.slot === 3 && plain.name === 'Amma' && plain.relation === 'mother' && plain.blob === photo && plain.at === 1234 && !('voice' in plain) && !('voiceMs' in plain), 'a person with no recording is kept as they are')
+  const withVoice = cleanPerson({ ...base, voice: clip, voiceMs: 1800 })
+  check(!!withVoice && withVoice.voice === clip && withVoice.voiceMs === 1800, 'a recording of the name is kept, with how long it is')
+  check(cleanPerson({ ...base, voice: undefined, voiceMs: undefined }) !== null && !('voice' in cleanPerson({ ...base, voice: undefined, voiceMs: undefined })!), 'a removed recording leaves no trace')
+  // a damaged recording never loses the person
+  for (const bad of ['sound', 5, {}, null, [], new Blob([])]) {
+    const c = cleanPerson({ ...base, voice: bad, voiceMs: 900 })
+    check(!!c && c.name === 'Amma' && !('voice' in c) && !('voiceMs' in c), `a recording that is ${bad instanceof Blob ? 'empty' : JSON.stringify(bad)} is dropped and the person kept`)
+  }
+  for (const ms of [-5, 0, 'long', null, 99_999, NaN]) {
+    const c = cleanPerson({ ...base, voice: clip, voiceMs: ms })
+    check(!!c && c.voice === clip && !('voiceMs' in c), `a length of ${String(ms)} is dropped and the recording kept`)
+  }
+  // a person who cannot be used is left out
+  for (const bad of [null, undefined, 'x', 5, [], {}, { ...base, blob: 'photo' }, { ...base, slot: -1 }, { ...base, slot: 12 }, { ...base, slot: 1.5 }, { ...base, name: 5 }, { ...base, relation: null }]) {
+    check(cleanPerson(bad) === null, `${JSON.stringify(bad)?.slice(0, 40)} is not a person`)
+  }
+  check(cleanPerson({ ...base, at: 'later' })!.at === 0, 'a missing time becomes 0')
+  check(NAME_VOICE_SECONDS === 4 && NAME_VOICE_MIN_MS === 400, 'a name is recorded for up to four seconds, and not less than 0.4')
+}
 
 // ── Face photos are square ──
 {
