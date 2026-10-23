@@ -4,7 +4,10 @@
   "private": true,
   "license": "AGPL-3.0-only",
   "author": "Pradeep Miriyala",
-  "repository": { "type": "git", "url": "https://github.com/pradeep-miriyala/autism-parenting.git" },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pradeep-miriyala/autism-parenting.git"
+  },
   "description": "Little Steps: calm practice games for autistic children. No timers, no scores, nothing leaves the device unless a parent chooses.",
   "engines": {
     "node": ">=22.18"
@@ -22,7 +25,7 @@
   "dependencies": {
     "@vercel/analytics": "^2.0.1",
     "mongodb": "^6.8.0",
-    "next": "^15.5.28",
+    "next": "^16.4.2",
     "qrcode-generator": "^2.0.4",
     "react": "^18",
     "react-dom": "^18"

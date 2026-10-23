@@ -28,15 +28,15 @@ designers hold the rights to them. They are not part of this repository.
 - **@img/sharp-wasm32** 0.35.5, Apache-2.0 AND LGPL-3.0-or-later AND MIT, https://github.com/lovell/sharp
 - **@mongodb-js/saslprep** 1.6.1, MIT, https://github.com/mongodb-js/devtools-shared
   - Copyright (c) 2014 Dmitry Tsvettsikh
-- **@next/env** 15.5.28, MIT, https://github.com/vercel/next.js
-- **@next/swc-linux-x64-gnu** 15.5.28, MIT, https://github.com/vercel/next.js
-- **@next/swc-linux-x64-musl** 15.5.28, MIT, https://github.com/vercel/next.js
-- **@swc/helpers** 0.5.15, Apache-2.0, https://github.com/swc-project/swc
+- **@next/env** 16.4.2, MIT, https://github.com/vercel/next.js
+- **@next/swc-linux-x64-gnu** 16.4.2, MIT, https://github.com/vercel/next.js
+- **@swc/helpers** 0.5.23, Apache-2.0, https://github.com/swc-project/swc
   - Copyright 2024 SWC contributors.
 - **@types/webidl-conversions** 7.0.3, MIT, https://github.com/DefinitelyTyped/DefinitelyTyped
 - **@types/whatwg-url** 11.0.5, MIT, https://github.com/DefinitelyTyped/DefinitelyTyped
 - **@vercel/analytics** 2.0.1, MIT, github:vercel/analytics
   - Copyright (c) 2026 Vercel, Inc.
+- **baseline-browser-mapping** 2.11.31, Apache-2.0, https://github.com/web-platform-dx/baseline-browser-mapping
 - **bson** 6.10.4, Apache-2.0, mongodb/js-bson
 - **caniuse-lite** 1.0.30001816, CC-BY-4.0, browserslist/caniuse-lite
 - **client-only** 0.0.1, MIT, https://reactjs.org/
@@ -52,12 +52,12 @@ designers hold the rights to them. They are not part of this repository.
   - Copyright 2020 MongoDB Inc.
 - **nanoid** 3.3.20, MIT, ai/nanoid
   - Copyright 2017 Andrey Sitnik <andrey@sitnik.ru>
-- **next** 15.5.28, MIT, vercel/next.js
+- **next** 16.4.2, MIT, vercel/next.js
   - Copyright (c) 2025 Vercel, Inc.
 - **picocolors** 1.1.1, ISC, alexeyraspopov/picocolors
   - Copyright (c) 2021-2024 Oleksii Raspopov, Kostiantyn Denysov, Anton Verinov
-- **postcss** 8.4.31, MIT, postcss/postcss
-  - Copyright 2013 Andrey Sitnik <andrey@sitnik.ru>
+- **postcss** 8.5.23, MIT, postcss/postcss
+  - Copyright 2013 Andrey Sitnik <andrey@sitnik.es>
 - **punycode** 2.3.1, MIT, https://github.com/mathiasbynens/punycode.js
 - **qrcode-generator** 2.0.4, MIT, https://github.com/kazuhikoarase/qrcode-generator
 - **react** 18.3.1, MIT, https://github.com/facebook/react
@@ -425,7 +425,7 @@ OTHER DEALINGS IN THE SOFTWARE.
 
 ### Apache-2.0
 
-Used by: @swc/helpers, bson
+Used by: @swc/helpers, baseline-browser-mapping, bson
 
 ```
 Apache License
