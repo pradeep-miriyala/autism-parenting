@@ -9,6 +9,8 @@ import { VIEW } from './spot/generate'
 import { SprinklesLayer, useSprinkles } from './sprinkles'
 import { useFeedback } from './feedback'
 import { useStuck } from './useStuck'
+import { useGuide } from './useGuide'
+import { EyeIcon } from './icons'
 import InfoButton from './InfoButton'
 import { celebration, isYoung, sprinklePalette, type Profile } from './profile'
 import { clampPos, homeOf, makeCut, photoGrid, piecePath, scatter, snapRadius, stackOrder, tableFor, type Pt } from './pictures/cut'
@@ -121,6 +123,7 @@ export default function PhotoJigsaw({ photo, level, plain, guide, sound, profile
   const radius = snapRadius(table.cw, table.ch)
   const home = useCallback((i: number) => homeOf(i, cols, rows, W, H), [cols, rows])
 
+  const hint = useGuide(guide && ready, done)
   const stuck = useStuck(ready && !done && order.length > 0, hintSec, misses, `${placed.length}:${moves}:${selected}`)
   const hintPiece = stuck && !done ? (selected ?? order[order.length - 1] ?? null) : null
 
@@ -236,7 +239,7 @@ export default function PhotoJigsaw({ photo, level, plain, guide, sound, profile
           <rect className="pj-table" x={view.x} y={view.y} width={view.w} height={view.h} rx="10" />
           <rect className="pj-shelf" x="0" y={table.shelfTop} width={W} height={table.shelfH} rx="8" />
           <rect className="pj-board" x="0" y="0" width={W} height={H} />
-          {guide && ready && <image href={src} x="0" y="0" width={W} height={H} preserveAspectRatio="none" opacity="0.22" />}
+          {guide && ready && <image className={`pj-guide${hint.shown ? '' : ' off'}`} href={src} x="0" y="0" width={W} height={H} preserveAspectRatio="none" />}
           <path className="pj-cut" d={allCuts} />
 
           {Array.from({ length: n }, (_, c) => {
@@ -265,6 +268,7 @@ export default function PhotoJigsaw({ photo, level, plain, guide, sound, profile
       <span className="sq-sr" role="status" aria-live="polite">{`${placed.length} of ${n} pieces in place.`}</span>
 
       <div className="sq-actions" style={{ marginTop: '.5rem', marginBottom: 0 }}>
+        {guide && !done && <button type="button" className="sq-ib" title="Show picture" aria-label="Show picture" onClick={hint.show} disabled={hint.shown}><EyeIcon /></button>}
         <button className={`sq-btn${done ? ' primary' : ''}`} onClick={onNext}>{done ? 'Another picture' : 'Other picture'}</button>
       </div>
     </div>

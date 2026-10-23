@@ -10,16 +10,18 @@ import { makePuzzle, makePuzzleScene, pieceBox, type PuzzleScene } from './think
 import { SprinklesLayer, useSprinkles } from './sprinkles'
 import { useFeedback } from './feedback'
 import { useStuck } from './useStuck'
+import { GUIDE_FADE_SEC, useGuide } from './useGuide'
+import { EyeIcon } from './icons'
 import InfoButton from './InfoButton'
 import { celebration, isYoung, sprinklePalette, type Profile } from './profile'
 
 const REACH = 12
 
 /** The whole picture, drawn into whatever box it is given; a piece is the same picture seen through a window. */
-function Piece({ scene, index, cols, rows, faint }: { scene: PuzzleScene; index: number; cols: number; rows: number; faint?: boolean }) {
+function Piece({ scene, index, cols, rows, faint, fade }: { scene: PuzzleScene; index: number; cols: number; rows: number; faint?: boolean; fade?: boolean }) {
   const b = pieceBox(index, cols, rows, VIEW.w, VIEW.h)
   return (
-    <svg viewBox={`${b.x} ${b.y} ${b.w} ${b.h}`} className="pz-svg" style={faint ? { opacity: 0.2 } : undefined} aria-hidden="true">
+    <svg viewBox={`${b.x} ${b.y} ${b.w} ${b.h}`} className="pz-svg" style={faint ? { opacity: fade ? 0 : 0.2, transition: `opacity ${GUIDE_FADE_SEC}s linear` } : undefined} aria-hidden="true">
       <rect x="0" y="0" width={VIEW.w} height={VIEW.h} fill={scene.bg} />
       {scene.objs.map(o => {
         const Art = ART[o.kind]
@@ -85,6 +87,7 @@ export default function PuzzleGame({ level, sound, profile, sprinklesOn, hintSec
   useEffect(() => () => onActive?.(false), [onActive])
 
   const loose = tray.filter(p => !placed.includes(p))
+  const hint = useGuide(!!scene, done)
   const stuck = useStuck(!!scene && !done && loose.length > 0, hintSec, misses, `${placed.length}:${shake.n}:${selected}`)
   const hintSlot = stuck && !done ? (selected ?? loose[0] ?? null) : null
 
@@ -173,7 +176,7 @@ export default function PuzzleGame({ level, sound, profile, sprinklesOn, hintSec
             <div key={i} ref={el => { slotRefs.current[i] = el }}
               className={`pz-slot${placed.includes(i) ? ' filled' : ''}${drag?.over === i ? ' over' : ''}${hintSlot === i ? ' hint' : ''}`}
               onClick={() => { if (selected !== null && !placed.includes(i)) place(selected, i) }}>
-              <Piece scene={scene} index={i} cols={grid.cols} rows={grid.rows} faint={!placed.includes(i)} />
+              <Piece scene={scene} index={i} cols={grid.cols} rows={grid.rows} faint={!placed.includes(i)} fade={!hint.shown} />
             </div>
           ))}
         </div>
@@ -195,6 +198,7 @@ export default function PuzzleGame({ level, sound, profile, sprinklesOn, hintSec
       <span className="sq-sr" role="status" aria-live="polite">{`${placed.length} of ${n} pieces in place.`}</span>
 
       <div className="sq-actions" style={{ marginTop: '.5rem', marginBottom: 0 }}>
+        {!done && <button type="button" className="sq-ib" title="Show picture" aria-label="Show picture" onClick={hint.show} disabled={hint.shown}><EyeIcon /></button>}
         {done
           ? <button className="sq-btn primary" onClick={onNext ?? newRound}>Another picture</button>
           : <button className="sq-btn" onClick={onNext ?? newRound}>Other picture</button>}
