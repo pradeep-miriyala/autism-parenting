@@ -13,7 +13,7 @@ The typefaces Faustina, Literata and Karla are loaded from Google Fonts. They ar
 The small emoji pictures on tiles and stickers are drawn by the phone or computer using its own emoji font. Their
 designers hold the rights to them. They are not part of this repository.
 
-## Packages (42)
+## Packages (41)
 
 - **@emnapi/runtime** 1.11.3, MIT, https://github.com/toyobayashi/emnapi
   - Copyright (c) 2021-present Toyobayashi
@@ -30,6 +30,7 @@ designers hold the rights to them. They are not part of this repository.
   - Copyright (c) 2014 Dmitry Tsvettsikh
 - **@next/env** 16.4.2, MIT, https://github.com/vercel/next.js
 - **@next/swc-linux-x64-gnu** 16.4.2, MIT, https://github.com/vercel/next.js
+- **@next/swc-linux-x64-musl** 16.4.2, MIT, https://github.com/vercel/next.js
 - **@swc/helpers** 0.5.23, Apache-2.0, https://github.com/swc-project/swc
   - Copyright 2024 SWC contributors.
 - **@types/webidl-conversions** 7.0.3, MIT, https://github.com/DefinitelyTyped/DefinitelyTyped
@@ -41,10 +42,6 @@ designers hold the rights to them. They are not part of this repository.
 - **caniuse-lite** 1.0.30001816, CC-BY-4.0, browserslist/caniuse-lite
 - **client-only** 0.0.1, MIT, https://reactjs.org/
 - **detect-libc** 2.1.2, Apache-2.0, git://github.com/lovell/detect-libc
-- **js-tokens** 4.0.0, MIT, lydell/js-tokens
-  - Copyright (c) 2014, 2015, 2016, 2017, 2018 Simon Lydell
-- **loose-envify** 1.4.0, MIT, git://github.com/zertosh/loose-envify
-  - Copyright (c) 2015 Andres Suarez <zertosh@gmail.com>
 - **memory-pager** 1.5.0, MIT, https://github.com/mafintosh/memory-pager
   - Copyright (c) 2017 Mathias Buus
 - **mongodb** 6.21.0, Apache-2.0, git@github.com:mongodb/node-mongodb-native
@@ -60,9 +57,9 @@ designers hold the rights to them. They are not part of this repository.
   - Copyright 2013 Andrey Sitnik <andrey@sitnik.es>
 - **punycode** 2.3.1, MIT, https://github.com/mathiasbynens/punycode.js
 - **qrcode-generator** 2.0.4, MIT, https://github.com/kazuhikoarase/qrcode-generator
-- **react** 18.3.1, MIT, https://github.com/facebook/react
-- **react-dom** 18.3.1, MIT, https://github.com/facebook/react
-- **scheduler** 0.23.2, MIT, https://github.com/facebook/react
+- **react** 19.3.1, MIT, https://github.com/react/react
+- **react-dom** 19.3.1, MIT, https://github.com/react/react
+- **scheduler** 0.28.0, MIT, https://github.com/react/react
 - **semver** 7.8.5, ISC, https://github.com/npm/node-semver
 - **sharp** 0.35.5, Apache-2.0, https://github.com/lovell/sharp
 - **source-map-js** 1.2.2, BSD-3-Clause, 7rulnik/source-map-js
@@ -1299,12 +1296,12 @@ Apache License
 
 ### MIT
 
-Used by: js-tokens, loose-envify, memory-pager, sparse-bitfield, whatwg-url
+Used by: memory-pager, sparse-bitfield, whatwg-url
 
 ```
 The MIT License (MIT)
 
-Copyright (c) 2014, 2015, 2016, 2017, 2018 Simon Lydell
+Copyright (c) 2017 Mathias Buus
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
