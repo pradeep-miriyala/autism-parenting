@@ -334,6 +334,7 @@ body:has(.sq-wrap.playmode){padding-top:.5rem}
 .fb-text{resize:vertical;min-height:7rem}
 .fb-count{margin:.2rem 0 0;text-align:right}
 .fb-count.over{color:#9A4A12}
+.fb-sum{max-width:7rem}
 .fb-trap{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
 .fa-add{display:grid;gap:.1rem;margin:.4rem 0 1rem;padding:.9rem;border:1px solid var(--line);background:#fff}
 .fa-add-top{display:flex;gap:.8rem;align-items:flex-start}

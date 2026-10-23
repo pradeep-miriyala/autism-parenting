@@ -46,6 +46,7 @@ so there is one place to look at everything.
 |---|---|
 | `MONGODB_URI` | The database for the anonymous counts and shared names |
 | `MONGODB_DB` | Database name (default `pradeep-site`, where the numbers already live) |
+| `FEEDBACK_SECRET` | Optional: signs the small sum on the feedback form (any long random text). If empty, `MONGODB_URI` is used |
 | `NEXT_PUBLIC_SITE_URL` | Optional: this site's address, for previews |
 | `NEXT_PUBLIC_PORTFOLIO_URL` | Where the "By Pradeep Miriyala" links go (default `https://pradeep.miriyala.in`) |
 
@@ -188,7 +189,9 @@ file that `scripts/test-thinking.mts` runs thousands of rounds of.
   a reply. It is sent only when they press Send, to `POST /api/feedback`, which checks every field (`src/lib/feedback.ts`)
   and saves it in `parenting_feedback`. Unlike the counts it answers honestly, so a parent knows whether it went: if it
   cannot be sent the words stay in the box. A box that people cannot see catches scripts (they are told it worked and
-  nothing is kept), and one address can send five an hour. The page asks parents not to write their child's name.
+  nothing is kept), and a small sum ("What is 7 plus 4?") must be answered. The server hands out the sum with a signed,
+  30-minute token (`GET /api/feedback`, `src/lib/captcha.ts`), so nothing is stored; a wrong or old answer is refused and a
+  new sum appears. It is a speed bump for simple scripts, not a wall, and one address can send five an hour. The page asks parents not to write their child's name.
 - **Family pictures.** *For parents → Family pictures* (`FamilyForm.tsx`): up to 12 people, each with a photo (cropped
   square and shrunk to 600 by 600 on the device, hidden details dropped), the name the child uses ("Amma", "Uncle Ravi",
   letters only, up to 24) and what they are to the child (mother, father, grandmother, brother, friend and so on). Two people
@@ -344,6 +347,7 @@ node scripts/test-colouring.mts  # colour it in: every part of every picture is 
 node scripts/test-maze.mts       # maze: one way through and no loops at every size, and no swipe, however wild, can cross a wall
 node scripts/test-shapes.mts     # colours and shapes: exactly one right answer in every question, at every level
 node scripts/test-memory.mts     # memory pairs: every picture twice, turning rules, hints, and a simulated player finishes
+node scripts/test-captcha.mts    # the feedback sum: made only with a secret, right answer passes, wrong, old or changed ones fail
 node scripts/test-feedback.mts   # feedback: kinds, lengths, emails, hidden characters, scripts; and exactly what is kept
 node scripts/test-share.mts      # share links are encoded and carry only the address; the QR code has its three corner marks
 node scripts/test-jigsaw.mts     # photo Jigsaw: every cut fits and adds up to the picture, knobs stay in their room, crops, next picture

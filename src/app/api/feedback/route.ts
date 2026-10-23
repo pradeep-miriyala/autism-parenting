@@ -3,11 +3,13 @@
 //
 // Unlike /api/ping this one does answer honestly, because a person is waiting to hear whether their message went:
 // 200 sent, 400 something to fix (the page says what), 429 too many, 503 could not be kept just now. A script that
-// fills in the hidden box is told 200 and nothing is kept.
+// fills in the hidden box is told 200 and nothing is kept. A small sum (src/lib/captcha.ts) must be answered: GET
+// gives one, and a wrong, old or missing answer is a 400 with reason "captcha".
 
 import { NextRequest, NextResponse } from 'next/server'
 import { getDb } from '@/lib/mongodb'
 import { FEEDBACK_PER_HOUR, checkFeedback, recordFeedback } from '@/lib/feedback'
+import { checkCaptcha, makeChallenge } from '@/lib/captcha'
 
 export const dynamic = 'force-dynamic'
 
@@ -31,6 +33,12 @@ const reply = (status: number, body: Record<string, unknown>) => NextResponse.js
 const within = <T,>(p: Promise<T>, ms: number) =>
   Promise.race([p, new Promise<never>((_, no) => setTimeout(() => no(new Error('timeout')), ms))])
 
+/** A fresh sum for the form to show. */
+export async function GET() {
+  const c = makeChallenge()
+  return c ? reply(200, { ok: true, ...c }) : reply(503, { ok: false, reason: 'unavailable' })
+}
+
 export async function POST(req: NextRequest) {
   const ip = req.headers.get('x-forwarded-for')?.split(',')[0].trim() || 'unknown'
   if (tooMany(ip, Date.now())) return reply(429, { ok: false, reason: 'many' })
@@ -49,6 +57,9 @@ export async function POST(req: NextRequest) {
     if (check.reason === 'spam') return reply(200, { ok: true })
     return reply(400, { ok: false, reason: check.reason })
   }
+
+  const captcha = (body as { captcha?: unknown }).captcha
+  if (!checkCaptcha(captcha)) return reply(400, { ok: false, reason: 'captcha' })
 
   try {
     await within(getDb().then(db => recordFeedback(db, check.feedback)), 8000)
