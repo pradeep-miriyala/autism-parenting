@@ -158,19 +158,19 @@ export default function VoiceSettings({ useRecordings, onUseRecordings }: {
               </span>
               <span className="vc-actions">
                 {recording ? (
-                  <button type="button" className="sq-btn ico primary" onClick={stop}><StopIcon />Stop</button>
+                  <button type="button" className="sq-ib primary" title="Stop" aria-label="Stop" onClick={stop}><StopIcon /></button>
                 ) : previewing ? (
                   <>
-                    <button type="button" className="sq-btn ico" onClick={() => playBlob(preview!.blob)}><PlayIcon />Listen</button>
-                    <button type="button" className="sq-btn ico primary" onClick={keep}><CheckIcon />Keep</button>
-                    <button type="button" className="sq-btn ico" onClick={() => { setPreview(null); start(slot) }}><RedoIcon />Again</button>
-                    <button type="button" className="sq-btn ico" onClick={() => setPreview(null)}><CloseIcon />Cancel</button>
+                    <button type="button" className="sq-ib" title="Listen" aria-label="Listen" onClick={() => playBlob(preview!.blob)}><PlayIcon /></button>
+                    <button type="button" className="sq-ib good" title="Keep" aria-label="Keep" onClick={keep}><CheckIcon /></button>
+                    <button type="button" className="sq-ib" title="Again" aria-label="Again" onClick={() => { setPreview(null); start(slot) }}><RedoIcon /></button>
+                    <button type="button" className="sq-ib" title="Cancel" aria-label="Cancel" onClick={() => setPreview(null)}><CloseIcon /></button>
                   </>
                 ) : (
                   <>
-                    {clip && <button type="button" className="sq-btn ico" disabled={busy} onClick={() => playBlob(clip.blob)}><PlayIcon />Play</button>}
-                    <button type="button" className="sq-btn ico rec" disabled={busy} onClick={() => start(slot)}>{clip ? <RedoIcon /> : <RecordIcon />}{clip ? 'Record again' : 'Record'}</button>
-                    {clip && <button type="button" className="sq-btn ico" disabled={busy} onClick={() => remove(slot)}><TrashIcon />{askDelete === slot ? 'Tap again to delete' : 'Delete'}</button>}
+                    {clip && <button type="button" className="sq-ib" title="Play" aria-label="Play" disabled={busy} onClick={() => playBlob(clip.blob)}><PlayIcon /></button>}
+                    <button type="button" className="sq-ib rec" disabled={busy} onClick={() => start(slot)} title={clip ? 'Record again' : 'Record'} aria-label={clip ? 'Record again' : 'Record'}>{clip ? <RedoIcon /> : <RecordIcon />}</button>
+                    {clip && <button type="button" className={`sq-ib bad${askDelete === slot ? ' armed' : ''}`} disabled={busy} onClick={() => remove(slot)} title={askDelete === slot ? 'Tap again to delete' : 'Delete'} aria-label={askDelete === slot ? 'Tap again to delete' : 'Delete'}><TrashIcon />{askDelete === slot && <span>Sure?</span>}</button>}
                   </>
                 )}
               </span>

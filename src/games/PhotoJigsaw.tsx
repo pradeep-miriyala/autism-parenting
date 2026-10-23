@@ -268,7 +268,7 @@ export default function PhotoJigsaw({ photo, level, plain, guide, sound, profile
       <span className="sq-sr" role="status" aria-live="polite">{`${placed.length} of ${n} pieces in place.`}</span>
 
       <div className="sq-actions" style={{ marginTop: '.5rem', marginBottom: 0 }}>
-        {guide && !done && <button type="button" className="sq-btn ico" onClick={hint.show} disabled={hint.shown}><EyeIcon />Show picture</button>}
+        {guide && !done && <button type="button" className="sq-ib" title="Show picture" aria-label="Show picture" onClick={hint.show} disabled={hint.shown}><EyeIcon /></button>}
         <button className={`sq-btn${done ? ' primary' : ''}`} onClick={onNext}>{done ? 'Another picture' : 'Other picture'}</button>
       </div>
     </div>

@@ -198,7 +198,7 @@ export default function PuzzleGame({ level, sound, profile, sprinklesOn, hintSec
       <span className="sq-sr" role="status" aria-live="polite">{`${placed.length} of ${n} pieces in place.`}</span>
 
       <div className="sq-actions" style={{ marginTop: '.5rem', marginBottom: 0 }}>
-        {!done && <button type="button" className="sq-btn ico" onClick={hint.show} disabled={hint.shown}><EyeIcon />Show picture</button>}
+        {!done && <button type="button" className="sq-ib" title="Show picture" aria-label="Show picture" onClick={hint.show} disabled={hint.shown}><EyeIcon /></button>}
         {done
           ? <button className="sq-btn primary" onClick={onNext ?? newRound}>Another picture</button>
           : <button className="sq-btn" onClick={onNext ?? newRound}>Other picture</button>}
