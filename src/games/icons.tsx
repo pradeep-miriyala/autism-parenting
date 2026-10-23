@@ -159,3 +159,11 @@ export function RedoIcon() {
 export function TrashIcon() {
   return <svg {...stroke}><path d="M4 7h16" /><path d="M9 7V4h6v3" /><path d="M6 7l1 13h10l1-13" /><path d="M10 11v6M14 11v6" /></svg>
 }
+
+export function CameraIcon() {
+  return <svg {...stroke}><path d="M4 8h3l1.5-2.5h7L17 8h3v11H4V8z" /><circle cx="12" cy="13" r="3.4" /></svg>
+}
+
+export function PencilIcon() {
+  return <svg {...stroke}><path d="M4 20l1-4L16.5 4.5a2 2 0 0 1 3 3L8 19l-4 1z" /><path d="M14.5 6.5l3 3" /></svg>
+}
