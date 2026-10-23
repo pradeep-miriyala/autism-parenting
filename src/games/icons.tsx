@@ -135,3 +135,27 @@ export function PictureIcon() {
 export function MicIcon() {
   return <svg {...stroke}><rect x="9" y="3" width="6" height="11" rx="3" /><path d="M5 11a7 7 0 0 0 14 0M12 18v3" /></svg>
 }
+
+export function EyeIcon() {
+  return <svg {...stroke}><path d="M2 12s3.6-6.5 10-6.5S22 12 22 12s-3.6 6.5-10 6.5S2 12 2 12z" /><circle cx="12" cy="12" r="3" /></svg>
+}
+
+export function RecordIcon() {
+  return <svg {...stroke} fill="currentColor"><circle cx="12" cy="12" r="6.5" /></svg>
+}
+
+export function StopIcon() {
+  return <svg {...stroke} fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2" /></svg>
+}
+
+export function CheckIcon() {
+  return <svg {...stroke}><path d="M5 12.5l4.5 4.5L19 7.5" /></svg>
+}
+
+export function RedoIcon() {
+  return <svg {...stroke}><path d="M20 12a8 8 0 1 1-2.6-5.9" /><path d="M20 4v5h-5" /></svg>
+}
+
+export function TrashIcon() {
+  return <svg {...stroke}><path d="M4 7h16" /><path d="M9 7V4h6v3" /><path d="M6 7l1 13h10l1-13" /><path d="M10 11v6M14 11v6" /></svg>
+}

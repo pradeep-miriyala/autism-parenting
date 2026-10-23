@@ -4,7 +4,7 @@
 //   level 2  "Where is Amma?" a picture and a name, and photos to choose from
 //   level 3  the family map   drag or tap each photo to the place for what that person is: grandparents, parents, ...
 // Everything a child needs to understand is a picture, not a word: each relation has its own icon. A word is only ever
-// heard when the child presses a speaker button, and then only that word is said (even with the sound setting off). A
+// heard when the child taps the thing itself, and then only that word is said (even with the sound setting off). A
 // person's name is played from the parent's own recording if they made one, and in the computer voice if not.
 // The photos and names stay on this device (family/store.ts). No timer, no score. A wrong choice buzzes and shakes;
 // nothing is lost. If the child is stuck, the right one gently pulses.
@@ -18,34 +18,12 @@ import { listPeople, type StoredPerson } from './family/store'
 import { SprinklesLayer, useSprinkles } from './sprinkles'
 import { useFeedback } from './feedback'
 import { useStuck } from './useStuck'
-import { SpeakerIcon } from './icons'
 import { playBlob } from './voice/player'
 import InfoButton from './InfoButton'
 import { celebration, isYoung, sprinklePalette, type Profile } from './profile'
 
 const SETTLE_MS = 1200
 const REACH = 14
-
-/**
- * A speaker button: says just this one word, whether or not the sound setting is on, and does nothing else. If there
- * is a recording of a parent saying it, that is played; if not, or if it cannot be played, the computer voice says it.
- */
-function Speak({ word, voice, say, big }: { word: string; voice?: Blob; say: (text: string, force?: boolean) => void; big?: boolean }) {
-  async function hear() {
-    if (voice) {
-      try { speechSynthesis.cancel() } catch {}
-      if (await playBlob(voice)) return
-    }
-    say(word, true)
-  }
-  return (
-    <button type="button" className={`fm-say${big ? ' big' : ''}`} aria-label={`Hear the word: ${word}`}
-      onClick={e => { e.stopPropagation(); hear() }}
-      onPointerDown={e => e.stopPropagation()}>
-      <SpeakerIcon />
-    </button>
-  )
-}
 
 /** What shows when the right one is chosen: the picture and the name, no sentence. */
 const found = (p: Person) => `${relationIcon(p.relation)} ${p.name}`
@@ -101,6 +79,14 @@ export default function FamilyGame({ level, sound, profile, sprinklesOn, hintSec
     const v = voices.get(p.id)
     if (v) { if (sound) playBlob(v).then(ok => { if (!ok) say(p.name) }); return }
     say(p.name)
+  }
+  /** Says just this one word, whether or not the sound setting is on: the recording if there is one, else the computer voice. */
+  async function hear(word: string, voice?: Blob) {
+    if (voice) {
+      try { speechSynthesis.cancel() } catch {}
+      if (await playBlob(voice)) return
+    }
+    say(word, true)
   }
   const enough = people.length >= MIN_FAMILY
 
@@ -165,7 +151,6 @@ export default function FamilyGame({ level, sound, profile, sprinklesOn, hintSec
     setSettling(true)
     const who = byId.get(id)!
     setMessage(found(who))
-    speakName(who)
     if (qi + 1 < questions.length) {
       // the next question starts clean: nothing left shaking from the last one
       timer.current = setTimeout(() => { setQi(i => i + 1); setSettling(false); setMessage(''); setShake({ n: 0, at: '' }) }, SETTLE_MS + 400)
@@ -258,7 +243,7 @@ export default function FamilyGame({ level, sound, profile, sprinklesOn, hintSec
             {Array.from({ length: total }, (_, i) => <span key={i} className={(lv === 3 ? i < placedCount : i < qi) || done ? 'on' : ''} />)}
           </div>
         </div>
-        <InfoButton say={say} text={lv === 1 ? 'Look at the photo. Tap the picture of who it is. Tap a speaker to hear that word.' : lv === 2 ? 'Tap the speaker to hear the word. Then tap the photo of that person.' : 'Put each photo in the right place on the family map. Drag it there, or tap the photo and then the place. Tap a speaker to hear that word.'} />
+        <InfoButton say={say} text={lv === 1 ? 'Look at the photo. Tap the picture of who it is. Tap a picture to hear its word.' : lv === 2 ? 'Tap the picture and word to hear it. Then tap the photo of that person.' : 'Put each photo in the right place on the family map. Drag it there, or tap the photo and then the place. Tap a place to hear its word.'} />
       </div>
 
       {lv === 1 && q && (
@@ -271,11 +256,10 @@ export default function FamilyGame({ level, sound, profile, sprinklesOn, hintSec
                 <div key={`${qi}-${id}-${shake.at === String(id) ? shake.n : 0}`} className="fm-opt">
                   <button type="button" aria-label={`${p.name}, ${relationLabel(p.relation)}`}
                     className={`fm-opt-main${hintOption === id ? ' hint' : ''}${shake.n > 0 && shake.at === String(id) ? ' shake' : ''}${settling && id === q.answer ? ' right' : ''}`}
-                    disabled={settling && id !== q.answer} onClick={() => choose(id)}>
+                    disabled={settling && id !== q.answer} onClick={() => { hear(p.name, voices.get(id)); choose(id) }}>
                     <span className="fm-icon" aria-hidden="true">{relationIcon(p.relation)}</span>
                     <span className="fm-word">{p.name}</span>
                   </button>
-                  <Speak word={p.name} voice={voices.get(id)} say={say} />
                 </div>
               )
             })}
@@ -288,11 +272,11 @@ export default function FamilyGame({ level, sound, profile, sprinklesOn, hintSec
         const word = q.ask === 'relation' ? relationLabel(target.relation) : target.name
         return (
           <>
-            <div className="fm-ask" role="group" aria-label={q.prompt}>
-              <Speak word={word} voice={q.ask === 'relation' ? undefined : voices.get(target.id)} say={say} big />
+            <button type="button" className="fm-ask" aria-label={`${q.prompt} Tap to hear: ${word}`}
+              onClick={() => hear(word, q.ask === 'relation' ? undefined : voices.get(target.id))}>
               <span className="fm-icon big" aria-hidden="true">{relationIcon(target.relation)}</span>
               <span className="fm-askword">{word}</span>
-            </div>
+            </button>
             <div className="fm-pics" role="group" aria-label={q.prompt}>
               {q.options.map((id, i) => (
                 <button key={`${qi}-${id}-${shake.at === String(id) ? shake.n : 0}`} type="button" aria-label={`Photo ${i + 1}`}
@@ -323,12 +307,14 @@ export default function FamilyGame({ level, sound, profile, sprinklesOn, hintSec
                           <div ref={el => { slotRefs.current[s.key] = el }} role="button"
                             aria-label={who !== undefined ? `${s.label}: ${byId.get(who)!.name}` : `${s.label}, empty`}
                             className={`fm-slot${who !== undefined ? ' filled' : ''}${drag?.over === s.key ? ' over' : ''}${hintSlot === s.key ? ' hint' : ''}${shake.n > 0 && shake.at === s.key ? ' shake' : ''}`}
-                            onClick={() => { if (selected !== null && who === undefined) put(selected, s) }}>
+                            onClick={() => {
+                              if (selected !== null && who === undefined) put(selected, s)
+                              else hear(who !== undefined ? byId.get(who)!.name : s.label, who !== undefined ? voices.get(who) : undefined)
+                            }}>
                             {who !== undefined
                               ? <><img src={urls[who]} alt="" /><span className="fm-slot-label">{byId.get(who)!.name}</span></>
                               : <span className="fm-slot-hole" aria-hidden="true"><span className="fm-icon">{relationIcon(s.relation)}</span></span>}
                           </div>
-                          <Speak word={who !== undefined ? byId.get(who)!.name : s.label} voice={who !== undefined ? voices.get(who) : undefined} say={say} />
                         </div>
                       )
                     })}

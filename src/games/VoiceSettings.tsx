@@ -7,6 +7,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { MAX_SECONDS, MIN_MS, SLOTS } from './voice/pick'
 import { deleteClip, listClips, saveClip, type Clip } from './voice/store'
 import { loadClips, playBlob } from './voice/player'
+import { CheckIcon, CloseIcon, PlayIcon, RecordIcon, RedoIcon, StopIcon, TrashIcon } from './icons'
 
 const MIMES = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4', 'audio/ogg;codecs=opus']
 const pickMime = () => { try { return MIMES.find(m => MediaRecorder.isTypeSupported(m)) } catch { return undefined } }
@@ -157,19 +158,19 @@ export default function VoiceSettings({ useRecordings, onUseRecordings }: {
               </span>
               <span className="vc-actions">
                 {recording ? (
-                  <button type="button" className="sq-btn primary" onClick={stop}>Stop</button>
+                  <button type="button" className="sq-btn ico primary" onClick={stop}><StopIcon />Stop</button>
                 ) : previewing ? (
                   <>
-                    <button type="button" className="sq-btn" onClick={() => playBlob(preview!.blob)}>Listen</button>
-                    <button type="button" className="sq-btn primary" onClick={keep}>Keep</button>
-                    <button type="button" className="sq-btn" onClick={() => { setPreview(null); start(slot) }}>Again</button>
-                    <button type="button" className="sq-btn" onClick={() => setPreview(null)}>Cancel</button>
+                    <button type="button" className="sq-btn ico" onClick={() => playBlob(preview!.blob)}><PlayIcon />Listen</button>
+                    <button type="button" className="sq-btn ico primary" onClick={keep}><CheckIcon />Keep</button>
+                    <button type="button" className="sq-btn ico" onClick={() => { setPreview(null); start(slot) }}><RedoIcon />Again</button>
+                    <button type="button" className="sq-btn ico" onClick={() => setPreview(null)}><CloseIcon />Cancel</button>
                   </>
                 ) : (
                   <>
-                    {clip && <button type="button" className="sq-btn" disabled={busy} onClick={() => playBlob(clip.blob)}>Play</button>}
-                    <button type="button" className="sq-btn" disabled={busy} onClick={() => start(slot)}>{clip ? 'Record again' : 'Record'}</button>
-                    {clip && <button type="button" className="sq-btn" disabled={busy} onClick={() => remove(slot)}>{askDelete === slot ? 'Tap again to delete' : 'Delete'}</button>}
+                    {clip && <button type="button" className="sq-btn ico" disabled={busy} onClick={() => playBlob(clip.blob)}><PlayIcon />Play</button>}
+                    <button type="button" className="sq-btn ico rec" disabled={busy} onClick={() => start(slot)}>{clip ? <RedoIcon /> : <RecordIcon />}{clip ? 'Record again' : 'Record'}</button>
+                    {clip && <button type="button" className="sq-btn ico" disabled={busy} onClick={() => remove(slot)}><TrashIcon />{askDelete === slot ? 'Tap again to delete' : 'Delete'}</button>}
                   </>
                 )}
               </span>

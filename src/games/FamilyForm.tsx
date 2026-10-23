@@ -9,6 +9,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { MAX_PEOPLE, deletePerson, freePlace, listPeople, savePerson, type StoredPerson } from './family/store'
 import { MIN_FAMILY, NAME_VOICE_MIN_MS, NAME_VOICE_SECONDS, RELATIONS, cleanPersonName, cleanRelation, relationIcon, sameName, MAX_NAME } from './family/logic'
 import { preparePhoto } from './pictures/prepare'
+import { CloseIcon, PlayIcon, RecordIcon, RedoIcon, StopIcon } from './icons'
 import { useRecorder } from './voice/useRecorder'
 import { playBlob } from './voice/player'
 
@@ -28,19 +29,19 @@ function NameVoice({ name, voice, disabled, onChange }: { name: string; voice: V
       {rec.active ? (
         <div className="fa-voice-row">
           <span className="sq-note" role="status">Recording… {Math.min(NAME_VOICE_SECONDS, Math.floor(rec.elapsed / 1000))} of {NAME_VOICE_SECONDS} s</span>
-          <button type="button" className="sq-btn primary" onClick={rec.stop}>Stop</button>
+          <button type="button" className="sq-btn ico primary" onClick={rec.stop}><StopIcon />Stop</button>
         </div>
       ) : voice ? (
         <div className="fa-voice-row">
           <span className="sq-note">Recorded, {seconds(voice.ms)}</span>
-          <button type="button" className="sq-btn" disabled={disabled} onClick={() => playBlob(voice.blob)}>Listen</button>
-          <button type="button" className="sq-btn" disabled={disabled} onClick={record}>Record again</button>
-          <button type="button" className="sq-btn" disabled={disabled} onClick={() => onChange(null)}>Remove</button>
+          <button type="button" className="sq-btn ico" disabled={disabled} onClick={() => playBlob(voice.blob)}><PlayIcon />Listen</button>
+          <button type="button" className="sq-btn ico" disabled={disabled} onClick={record}><RedoIcon />Record again</button>
+          <button type="button" className="sq-btn ico" disabled={disabled} onClick={() => onChange(null)}><CloseIcon />Remove</button>
         </div>
       ) : (
         <div className="fa-voice-row">
           <span className="sq-note">Not recorded. The computer voice will say it.</span>
-          <button type="button" className="sq-btn" disabled={disabled} onClick={record}>Record</button>
+          <button type="button" className="sq-btn ico rec" disabled={disabled} onClick={record}><RecordIcon />Record</button>
         </div>
       )}
       {rec.error && <p className="sq-note vc-error" role="alert">{rec.error}</p>}
