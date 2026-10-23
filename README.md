@@ -7,6 +7,24 @@ anonymous count of visits and finished rounds, which a parent can switch off.
 A free project by [Pradeep Miriyala](https://pradeep.miriyala.in). Installable on a phone ("Add to home
 screen") and works offline after one visit.
 
+## Licence
+
+Little Steps is free software under the **GNU Affero General Public License v3** (`AGPL-3.0-only`, see [LICENSE](LICENSE)).
+In plain words:
+
+- You may read, run, change and share the code.
+- If you share a changed version, or run one for others over a network, you must publish your changes under the same
+  licence. Section 13 of the licence covers the network case.
+- The name "Little Steps", its icon and the author's name are not licensed for use as your own branding.
+- Copyright of the code and the drawings belongs to Pradeep Miriyala. The author may also offer the code under other
+  terms, for example in a future paid edition. To keep that possible, a contribution needs the author's agreement that
+  it may be used on those terms too. Please open an issue to talk about it before sending a large change.
+
+The packages Little Steps is built on keep their own licences. They are listed in
+[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). After changing dependencies, run `npm run notices` to rebuild it.
+
+Nothing a family adds (photos, names, recordings) is in this repository. It stays on the family's own device.
+
 ## Run it
 
 ```bash
@@ -28,6 +46,7 @@ so there is one place to look at everything.
 |---|---|
 | `MONGODB_URI` | The database for the anonymous counts and shared names |
 | `MONGODB_DB` | Database name (default `pradeep-site`, where the numbers already live) |
+| `FEEDBACK_SECRET` | Optional: signs the small sum on the feedback form (any long random text). If empty, `MONGODB_URI` is used |
 | `NEXT_PUBLIC_SITE_URL` | Optional: this site's address, for previews |
 | `NEXT_PUBLIC_PORTFOLIO_URL` | Where the "By Pradeep Miriyala" links go (default `https://pradeep.miriyala.in`) |
 
@@ -87,7 +106,7 @@ inside the game (`GameScreen.tsx`) carries the controls, so the game keeps the r
 | Colours and Shapes | Taps the one that fits: "Find the red one.", "Find the circle.", "Find the blue triangle." | 5 questions; 3, 4 or 6 choices. Level 1 changes one thing at a time, level 2 changes both but asks about one, level 3 asks about both with look-alikes. Every question has exactly one right answer (`makeShapesRound` in `thinking/rounds.ts`) |
 | Maze | Draws a line with a finger from the start (an animal) to the end (its food) through a maze | 4 by 3, 5 by 4 or 8 by 6 cells. Every maze has exactly one way through and no loops. The line follows the finger as far as there are passages and stops at a wall, which glows; nothing buzzes. Press the end of the line to carry on, press anywhere on it to go back to that place, or tap the next cell for a single step. If stuck, a dotted line shows the way on, or the way back out of a dead end (`maze/maze.ts`) |
 | Colour It In | Picks a colour and touches a part of a picture to paint it, or drags a finger across several | 10 pictures drawn in code as shapes (5 to 12 parts; level 1 uses the three simplest, level 3 all ten), 12 colours. Nothing can go wrong: Undo takes back the last stroke, white takes a colour off, Start again can itself be undone. "I am finished" ends the round and earns a sticker (`colouring/pictures.ts`) |
-| Family Faces | Level 1: "Who is this?" (a photo, and a picture for each choice: mother, father, grandfather and so on). Level 2: a picture and a word ("Amma", or "Mother"), then four photos. Level 3: the family map, dragging each photo to the place for what that person is (grandparents, parents, the child and brothers and sisters, friends) | Built on pictures, not words: every relation has its own icon (`RELATION_ICONS` in `family/logic.ts`, no two alike), the empty places on the map show the icon of who goes there, and the rows are pictures. A **speaker button** next to a word says just that one word, even with the sound setting off; nothing is read aloud by itself. A person's name is played from the parent's own recording if they made one, otherwise (or if the recording cannot be played) in the computer voice; relation words ("Mother") use the computer voice. A right answer shows the icon and the name, not a sentence. Uses the people a parent adds on *For parents → Family pictures*; needs at least two. Every question has exactly one right answer, and the choices in level 1 are different relations so no two look alike (`family/logic.ts`) |
+| Family Faces | Level 1: "Who is this?" (a photo, and a picture for each choice: mother, father, grandfather and so on). Level 2: a picture and a word ("Amma", or "Mother"), then four photos. Level 3: the family map, dragging each photo to the place for what that person is (grandparents, parents, the child and brothers and sisters, friends) | Built on pictures, not words: every relation has its own icon (`RELATION_ICONS` in `family/logic.ts`, no two alike), the empty places on the map show the icon of who goes there, and the rows are pictures. **Tapping a picture or a word** (an option, the question card or a place on the map) says just that one word, even with the sound setting off; nothing is read aloud by itself. A person's name is played from the parent's own recording if they made one, otherwise (or if the recording cannot be played) in the computer voice; relation words ("Mother") use the computer voice. A right answer shows the icon and the name, not a sentence. Uses the people a parent adds on *For parents → Family pictures*; needs at least two. Every question has exactly one right answer, and the choices in level 1 are different relations so no two look alike (`family/logic.ts`) |
 | Helpful Habits | A card shows something a child does; drag it to "Helps me" or "Does not help me" (or tap the bucket) | 28 cards; 3–10 per round; right = sparkle and a sentence ("Brushing my teeth helps me."); wrong = buzz and the card slides back; no "good"/"bad" wording |
 
 The home screen groups the games (Numbers, Thinking, Letters and writing, Everyday life) in `GAME_GROUPS` and
@@ -153,7 +172,7 @@ file that `scripts/test-thinking.mts` runs thousands of rounds of.
   - **How it plays** (`PhotoJigsaw.tsx`). The board is at the top and the loose pieces lie on a shelf under it, all in
     one SVG. A child drags a piece anywhere. Let go near its place (about 40% of a piece away, and never less than 22 units, so small pieces are still easy to place) and it clicks in with
     the sparkle; let go anywhere else and it stays where it was dropped, with no buzz and no score. Tapping a piece,
-    then its place, works too. A faint copy of the photo on the board is on by default and can be switched off. The
+    then its place, works too. A faint copy of the photo on the board is on by default and can be switched off. It fades away slowly after 10 seconds, and a "Show picture" button brings it back (`useGuide.ts`, also used by the drawn jigsaw). The
     usual hint pulses the place for the piece last touched.
 - **Draw the line (Connect the Dots).** A line follows the finger from the last joined dot. When it comes within reach
   of the next dot it clicks on and carries on from there, so a whole picture can be drawn without lifting. Lifting
@@ -170,7 +189,9 @@ file that `scripts/test-thinking.mts` runs thousands of rounds of.
   a reply. It is sent only when they press Send, to `POST /api/feedback`, which checks every field (`src/lib/feedback.ts`)
   and saves it in `parenting_feedback`. Unlike the counts it answers honestly, so a parent knows whether it went: if it
   cannot be sent the words stay in the box. A box that people cannot see catches scripts (they are told it worked and
-  nothing is kept), and one address can send five an hour. The page asks parents not to write their child's name.
+  nothing is kept), and a small sum ("What is 7 plus 4?") must be answered. The server hands out the sum with a signed,
+  30-minute token (`GET /api/feedback`, `src/lib/captcha.ts`), so nothing is stored; a wrong or old answer is refused and a
+  new sum appears. It is a speed bump for simple scripts, not a wall, and one address can send five an hour. The page asks parents not to write their child's name.
 - **Family pictures.** *For parents → Family pictures* (`FamilyForm.tsx`): up to 12 people, each with a photo (cropped
   square and shrunk to 600 by 600 on the device, hidden details dropped), the name the child uses ("Amma", "Uncle Ravi",
   letters only, up to 24) and what they are to the child (mother, father, grandmother, brother, friend and so on). Two people
@@ -326,6 +347,7 @@ node scripts/test-colouring.mts  # colour it in: every part of every picture is 
 node scripts/test-maze.mts       # maze: one way through and no loops at every size, and no swipe, however wild, can cross a wall
 node scripts/test-shapes.mts     # colours and shapes: exactly one right answer in every question, at every level
 node scripts/test-memory.mts     # memory pairs: every picture twice, turning rules, hints, and a simulated player finishes
+node scripts/test-captcha.mts    # the feedback sum: made only with a secret, right answer passes, wrong, old or changed ones fail
 node scripts/test-feedback.mts   # feedback: kinds, lengths, emails, hidden characters, scripts; and exactly what is kept
 node scripts/test-share.mts      # share links are encoded and carry only the address; the QR code has its three corner marks
 node scripts/test-jigsaw.mts     # photo Jigsaw: every cut fits and adds up to the picture, knobs stay in their room, crops, next picture

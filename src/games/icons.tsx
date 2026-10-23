@@ -159,3 +159,23 @@ export function RedoIcon() {
 export function TrashIcon() {
   return <svg {...stroke}><path d="M4 7h16" /><path d="M9 7V4h6v3" /><path d="M6 7l1 13h10l1-13" /><path d="M10 11v6M14 11v6" /></svg>
 }
+
+export function CameraIcon() {
+  return <svg {...stroke}><path d="M4 8h3l1.5-2.5h7L17 8h3v11H4V8z" /><circle cx="12" cy="13" r="3.4" /></svg>
+}
+
+export function PencilIcon() {
+  return <svg {...stroke}><path d="M4 20l1-4L16.5 4.5a2 2 0 0 1 3 3L8 19l-4 1z" /><path d="M14.5 6.5l3 3" /></svg>
+}
+
+export function BulbIcon() {
+  return <svg {...stroke}><path d="M9 18h6M10 21h4" /><path d="M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z" /></svg>
+}
+
+export function SparkleIcon() {
+  return <svg {...stroke}><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8L12 3z" /><path d="M19 16v4M17 18h4" /></svg>
+}
+
+export function SlidersIcon() {
+  return <svg {...stroke}><path d="M4 7h10M18 7h2M4 17h2M10 17h10" /><circle cx="16" cy="7" r="2" /><circle cx="8" cy="17" r="2" /></svg>
+}

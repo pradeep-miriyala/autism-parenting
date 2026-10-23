@@ -14,12 +14,19 @@ export default function CopyrightPage() {
   return (
     <div className="ls-page ls-about">
       <h1 className="ls-h1">Copyright</h1>
-      <p className="sq-ph-dek">© {YEAR} Pradeep Miriyala. All rights reserved.</p>
+      <p className="sq-ph-dek">© {YEAR} Pradeep Miriyala.</p>
 
       <h2 className="sq-subhead">Little Steps</h2>
       <p className="sq-ph-text">
-        The games, drawings, words, sounds and code of Little Steps were made by Pradeep Miriyala. Please do not copy,
-        sell or republish them without written permission.
+        The games, drawings, words, sounds and code of Little Steps were made by Pradeep Miriyala.
+      </p>
+      <p className="sq-ph-text">
+        The code is open source under the GNU Affero General Public License v3. Anyone may read it, run it and change it.
+        If someone shares a changed version, or runs one for others, they must share their changes under the same
+        licence. The name Little Steps and its icon are not part of that licence.
+      </p>
+      <p className="sq-ph-text">
+        The source code is on GitHub, as pradeep-miriyala/autism-parenting. A grown-up can find the link in the parents’ area.
       </p>
       <p className="sq-ph-text">
         Using Little Steps with your own child is what it is for. Sharing the link with other families is always welcome.
@@ -46,6 +53,10 @@ export default function CopyrightPage() {
         <li>The typefaces Faustina, Literata and Karla, from Google Fonts, under the SIL Open Font Licence.</li>
         <li>The small emoji pictures on tiles and stickers are drawn by your own phone or computer. Their designers hold the rights to them.</li>
       </ul>
+
+      <p className="sq-note">
+        The full list, with every licence, is in THIRD_PARTY_NOTICES.md in the source code.
+      </p>
 
       <p className="sq-note">
         Little Steps is not medical advice, and it does not replace the guidance of your child’s therapist or teacher.

@@ -7,9 +7,9 @@
 import Link from 'next/link'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { MAX_PEOPLE, deletePerson, freePlace, listPeople, savePerson, type StoredPerson } from './family/store'
-import { MIN_FAMILY, NAME_VOICE_MIN_MS, NAME_VOICE_SECONDS, RELATIONS, cleanPersonName, cleanRelation, relationIcon, sameName, MAX_NAME } from './family/logic'
+import { MIN_FAMILY, relationLabel, NAME_VOICE_MIN_MS, NAME_VOICE_SECONDS, RELATIONS, cleanPersonName, cleanRelation, relationIcon, sameName, MAX_NAME } from './family/logic'
 import { preparePhoto } from './pictures/prepare'
-import { CloseIcon, PlayIcon, RecordIcon, RedoIcon, StopIcon } from './icons'
+import { CameraIcon, CheckIcon, CloseIcon, LockIcon, MicIcon, PencilIcon, PlayIcon, RecordIcon, RedoIcon, StopIcon, TrashIcon } from './icons'
 import { useRecorder } from './voice/useRecorder'
 import { playBlob } from './voice/player'
 
@@ -50,7 +50,21 @@ function NameVoice({ name, voice, disabled, onChange }: { name: string; voice: V
   )
 }
 
-function PersonRow({ person, url, others, busy, onSave, onDelete }: {
+/** What the person is to the child, chosen from pictures with names. */
+function RelationPicker({ id, value, disabled, onChange }: { id: string; value: string; disabled?: boolean; onChange: (r: string) => void }) {
+  return (
+    <div className="fa-chips" role="radiogroup" aria-labelledby={id}>
+      {RELATIONS.map(r => (
+        <button key={r.id} type="button" role="radio" aria-checked={value === r.id} disabled={disabled}
+          className={`fa-chip${value === r.id ? ' on' : ''}`} onClick={() => onChange(r.id)}>
+          <span aria-hidden="true">{relationIcon(r.id)}</span>{r.label}
+        </button>
+      ))}
+    </div>
+  )
+}
+
+function PersonCard({ person, url, others, busy, onSave, onDelete }: {
   person: StoredPerson
   url: string
   others: StoredPerson[]
@@ -58,6 +72,7 @@ function PersonRow({ person, url, others, busy, onSave, onDelete }: {
   onSave: (p: StoredPerson, note?: string) => Promise<void>
   onDelete: (slot: number) => void
 }) {
+  const [open, setOpen] = useState(false)
   const [name, setName] = useState(person.name)
   const [problem, setProblem] = useState('')
   const [sure, setSure] = useState(false)
@@ -71,27 +86,44 @@ function PersonRow({ person, url, others, busy, onSave, onDelete }: {
     setProblem('')
     await onSave({ ...person, name: clean })
   }
+  function close() { setOpen(false); setSure(false); setProblem('') }
 
   return (
-    <li className="fa-person">
-      {url ? <img src={url} alt={`Photo of ${person.name}`} /> : <div className="pc-blank" />}
-      <div className="fa-fields">
-        <label className="sq-note fa-label" htmlFor={`fa-n-${person.slot}`}>What your child calls them</label>
-        <input id={`fa-n-${person.slot}`} className="fb-line" value={name} maxLength={MAX_NAME} disabled={busy}
-          onChange={e => setName(e.target.value)} onBlur={saveName} onKeyDown={e => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur() }} />
-        <label className="sq-note fa-label" htmlFor={`fa-r-${person.slot}`}>They are the child’s</label>
-        <select id={`fa-r-${person.slot}`} className="fb-line" value={person.relation} disabled={busy}
-          onChange={e => onSave({ ...person, relation: cleanRelation(e.target.value) })}>
-          {RELATIONS.map(r => <option key={r.id} value={r.id}>{relationIcon(r.id)}  {r.label}</option>)}
-        </select>
-        <NameVoice name={person.name} disabled={busy}
-          voice={person.voice ? { blob: person.voice, ms: person.voiceMs ?? 0 } : null}
-          onChange={v => onSave({ ...person, voice: v?.blob, voiceMs: v?.ms })} />
-        {problem && <p className="sq-note vc-error" role="alert">{problem}</p>}
-        <button type="button" className="sq-btn" disabled={busy} onClick={() => { if (!sure) setSure(true); else onDelete(person.slot) }}>
-          {sure ? 'Tap again to delete' : 'Delete'}
+    <li className={`fa-card${open ? ' open' : ''}`}>
+      <div className="fa-card-top">
+        <div className="fa-card-photo">
+          {url ? <img src={url} alt={`Photo of ${person.name}`} /> : <div className="pc-blank" />}
+          {person.voice && <span className="fa-badge" title="Name recorded" aria-label="Name recorded"><MicIcon /></span>}
+        </div>
+        <div className="fa-card-text">
+          <strong className="fa-card-name">{person.name}</strong>
+          <span className="fa-card-rel"><span aria-hidden="true">{relationIcon(person.relation)}</span> {relationLabel(person.relation)}</span>
+        </div>
+        <button type="button" className="sq-ib fa-edit" title={open ? 'Done' : `Edit ${person.name}`} aria-label={open ? 'Done' : `Edit ${person.name}`}
+          aria-expanded={open} onClick={() => (open ? close() : setOpen(true))}>
+          {open ? <CheckIcon /> : <PencilIcon />}
         </button>
       </div>
+      {open && (
+        <div className="fa-fields">
+          <label className="sq-note fa-label" htmlFor={`fa-n-${person.slot}`}>What your child calls them</label>
+          <input id={`fa-n-${person.slot}`} className="fb-line" value={name} maxLength={MAX_NAME} disabled={busy}
+            onChange={e => setName(e.target.value)} onBlur={saveName} onKeyDown={e => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur() }} />
+          {problem && <p className="sq-note vc-error" role="alert">{problem}</p>}
+          <span className="sq-note fa-label" id={`fa-r-${person.slot}`}>They are the child’s</span>
+          <RelationPicker id={`fa-r-${person.slot}`} value={person.relation} disabled={busy} onChange={r => onSave({ ...person, relation: cleanRelation(r) })} />
+          <NameVoice name={person.name} disabled={busy}
+            voice={person.voice ? { blob: person.voice, ms: person.voiceMs ?? 0 } : null}
+            onChange={v => onSave({ ...person, voice: v?.blob, voiceMs: v?.ms })} />
+          <div className="fa-card-actions">
+            <button type="button" className={`sq-ib bad${sure ? ' armed' : ''}`} disabled={busy}
+              title={sure ? 'Tap again to delete' : 'Delete'} aria-label={sure ? 'Tap again to delete' : 'Delete'}
+              onClick={() => { if (!sure) setSure(true); else onDelete(person.slot) }}>
+              <TrashIcon />{sure && <span>Sure?</span>}
+            </button>
+          </div>
+        </div>
+      )}
     </li>
   )
 }
@@ -166,37 +198,37 @@ export default function FamilyForm() {
     <section aria-labelledby="sq-family-title">
       <h3 id="sq-family-title" className="sq-subhead">Family pictures</h3>
       <p className="sq-note">
-        Add the people your child knows: family, friends and others. Each one has a photo, the name your child uses for
-        them (such as Amma or Uncle Ravi) and what they are to your child. You can also record yourself saying the name, so
-        your child hears it the way you say it. The game Family Faces uses them to ask “Who is this?” and “Where is
-        Amma?”, and to build a family map.
+        Add the people your child knows. Each one has a photo, the name your child uses and what they are to your child.
+        You can also record yourself saying the name. Family Faces uses them to ask “Who is this?” and “Where is Amma?”.
       </p>
-      <p className="sq-note">
-        Photos, names and recordings stay on this phone or computer. They are never uploaded. Each photo is cropped square,
-        and anything hidden in the file, such as where it was taken, is dropped. The microphone is used only while you
-        press Record.
+      <p className="sq-note fa-privacy">
+        <LockIcon />Everything stays on this phone or computer. Photos are cropped square and hidden details are dropped.
       </p>
 
       <h3 className="sq-subhead">Add a person</h3>
       <form onSubmit={add} noValidate className="fa-add">
-        <div className="fa-photo">
-          {preview ? <img src={preview} alt="The photo you chose" /> : <span className="fa-photo-ph" aria-hidden="true">📷</span>}
-        </div>
         <input ref={input} type="file" accept="image/*" hidden onChange={e => { const f = e.target.files?.[0] ?? null; e.target.value = ''; setFile(f); setError('') }} />
-        <p className="ls-links"><button type="button" className="sq-btn" disabled={busy || full} onClick={() => input.current?.click()}>{file ? 'Choose another photo' : 'Choose a photo'}</button></p>
+        <div className="fa-add-top">
+          <button type="button" className={`fa-photo${preview ? ' has' : ''}`} disabled={busy || full}
+            aria-label={file ? 'Choose another photo' : 'Choose a photo'} onClick={() => input.current?.click()}>
+            {preview
+              ? <img src={preview} alt="The photo you chose" />
+              : <><CameraIcon /><span>Add photo</span></>}
+          </button>
+          <div className="fa-add-name">
+            <label className="sq-note fa-label" htmlFor="fa-name">What does your child call them?</label>
+            <input id="fa-name" className="fb-line" value={name} maxLength={MAX_NAME} placeholder="Amma" disabled={busy || full} onChange={e => setName(e.target.value)} />
+          </div>
+        </div>
 
-        <label className="sq-note fa-label" htmlFor="fa-name">What does your child call them?</label>
-        <input id="fa-name" className="fb-line" value={name} maxLength={MAX_NAME} placeholder="Amma" disabled={busy || full} onChange={e => setName(e.target.value)} />
-        <label className="sq-note fa-label" htmlFor="fa-relation">They are your child’s</label>
-        <select id="fa-relation" className="fb-line" value={relation} disabled={busy || full} onChange={e => setRelation(e.target.value)}>
-          {RELATIONS.map(r => <option key={r.id} value={r.id}>{relationIcon(r.id)}  {r.label}</option>)}
-        </select>
+        <span className="sq-note fa-label" id="fa-relation">They are your child’s</span>
+        <RelationPicker id="fa-relation" value={relation} disabled={busy || full} onChange={setRelation} />
 
         <NameVoice name={name} voice={voice} disabled={busy || full} onChange={setVoice} />
 
         {error && <p className="sq-note vc-error" role="alert">{error}</p>}
         {note && <p className="sq-note" role="status">{note}</p>}
-        <p className="ls-links"><button type="submit" className="sq-btn primary" disabled={busy || full}>{busy ? 'Saving…' : 'Add'}</button></p>
+        <button type="submit" className="sq-btn primary fa-submit" disabled={busy || full}>{busy ? 'Saving…' : 'Add person'}</button>
       </form>
 
       <h3 className="sq-subhead">Your people ({people.length} of {MAX_PEOPLE})</h3>
@@ -205,7 +237,7 @@ export default function FamilyForm() {
       {people.length > 0 && (
         <ul className="fa-list">
           {people.map(p => (
-            <PersonRow key={p.slot} person={p} url={urls[p.slot]} others={people.filter(o => o.slot !== p.slot)} busy={busy} onSave={save} onDelete={remove} />
+            <PersonCard key={p.slot} person={p} url={urls[p.slot]} others={people.filter(o => o.slot !== p.slot)} busy={busy} onSave={save} onDelete={remove} />
           ))}
         </ul>
       )}

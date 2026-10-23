@@ -2,7 +2,7 @@
 // Feedback: a parent tells the developer what works, what does not and what they would like. It is sent only when
 // Send is pressed, and the page says exactly what is kept (see src/lib/feedback.ts). If it cannot be sent, the
 // words stay in the box.
-import { useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { FEEDBACK_KINDS, FEEDBACK_LABELS, MAX_MESSAGE, MIN_MESSAGE, type FeedbackKind } from '@/lib/feedback'
 
 type State = 'idle' | 'sending' | 'sent' | 'error'
@@ -11,9 +11,11 @@ const PROBLEMS: Record<string, string> = {
   short: 'Please write a little more, so the message makes sense.',
   long: `That is too long. Please keep it under ${MAX_MESSAGE} letters.`,
   contact: 'That email address does not look right. You can also leave it empty.',
+  captcha: 'That answer is not right. Please try the new sum.',
   many: 'You have sent a few messages already. Please try again a little later.',
   unavailable: 'The message could not be kept just now. It is still here, so please try again in a little while.',
 }
+type Sum = { question: string; token: string }
 const GENERIC = 'The message could not be sent. It is still here, so please check your connection and try again.'
 
 export default function FeedbackForm() {
@@ -24,9 +26,24 @@ export default function FeedbackForm() {
   const [state, setState] = useState<State>('idle')
   const [problem, setProblem] = useState('')
   const sending = useRef(false)
+  const [sum, setSum] = useState<Sum | null>(null)
+  const [answer, setAnswer] = useState('')
+
+  // A fresh sum, from the server. Without one the form cannot be sent, and says why.
+  const fetchSum = useCallback(async () => {
+    setAnswer('')
+    try {
+      const res = await fetch('/api/feedback', { cache: 'no-store' })
+      const body = await res.json()
+      setSum(res.ok && body.ok ? { question: body.question, token: body.token } : null)
+    } catch {
+      setSum(null)
+    }
+  }, [])
+  useEffect(() => { fetchSum() }, [fetchSum])
 
   const long = message.length > MAX_MESSAGE
-  const ready = message.trim().length >= MIN_MESSAGE && !long && state !== 'sending'
+  const ready = message.trim().length >= MIN_MESSAGE && !long && state !== 'sending' && !!sum && answer.trim() !== ''
 
   async function send(e: React.FormEvent) {
     e.preventDefault()
@@ -40,7 +57,7 @@ export default function FeedbackForm() {
       const res = await fetch('/api/feedback', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ kind, message, contact: contact.trim() || undefined, site: trap }),
+        body: JSON.stringify({ kind, message, contact: contact.trim() || undefined, site: trap, captcha: sum ? { token: sum.token, answer: answer.trim() } : undefined }),
         signal: stop.signal,
       })
       const body = await res.json().catch(() => ({}))
@@ -48,9 +65,11 @@ export default function FeedbackForm() {
         setState('sent')
         setMessage('')
         setContact('')
+        fetchSum()
       } else {
         setProblem(PROBLEMS[body.reason as string] || GENERIC)
         setState('error')
+        if (body.reason === 'captcha') fetchSum()
       }
     } catch {
       setProblem(GENERIC)
@@ -103,6 +122,13 @@ export default function FeedbackForm() {
         <div className="fb-trap" aria-hidden="true">
           <label>Leave this empty<input type="text" name="site" tabIndex={-1} autoComplete="off" value={trap} onChange={e => setTrap(e.target.value)} /></label>
         </div>
+
+        <label className="sq-note fb-label" htmlFor="fb-sum">
+          {sum ? <>To show you are a person: what is <strong>{sum.question}</strong>?</> : 'A small sum will appear here.'}
+        </label>
+        <input id="fb-sum" className="fb-line fb-sum" type="text" inputMode="numeric" pattern="[0-9]*" autoComplete="off" maxLength={3}
+          value={answer} disabled={!sum} onChange={e => setAnswer(e.target.value.replace(/\D/g, ''))} />
+        {!sum && <p className="sq-note"><button type="button" className="sq-btn" onClick={fetchSum}>Try again</button></p>}
 
         <p className="sq-note">
           Please do not write your child’s name or other personal details. The message is sent to the developer and is
