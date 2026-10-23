@@ -716,4 +716,34 @@ body:has(.sq-wrap.playmode){padding-top:.5rem}
   /* No movement: the clue is a steady tinted key with a ring. */
   .sq-key.hint{animation:none;background:color-mix(in srgb,var(--accent) 16%,#fff);box-shadow:0 0 0 4px color-mix(in srgb,var(--accent) 25%,transparent)}
 }
+.st-card{padding:.4rem .9rem .8rem}
+.st-row{display:flex;align-items:center;gap:.7rem;padding:.7rem 0;border-bottom:1px solid var(--line)}
+.st-ico{flex:none;width:40px;height:40px;display:grid;place-items:center;border-radius:12px;background:color-mix(in srgb,var(--accent) 10%,#fff);color:var(--accent);font-size:1.3rem;line-height:1}
+.st-ico svg{width:22px;height:22px}
+.st-text{flex:1;min-width:0;display:grid;gap:.1rem}
+.st-text strong{font-family:var(--f-ui);font-size:.85rem;font-weight:600;color:var(--ink)}
+.st-text small{font-size:.7rem;line-height:1.35;color:var(--ink-50)}
+.st-ctl{flex:none}
+.st-ctl select{min-height:40px;padding:.3rem .4rem;border:1px solid var(--line);background:#fff;font-size:.8rem;color:var(--ink)}
+.st-switch{width:52px;height:30px;padding:3px;border-radius:15px;border:0;background:#C9C5BB;cursor:pointer;display:block;transition:background .15s;touch-action:manipulation}
+.st-switch span{display:block;width:24px;height:24px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.3);transition:transform .15s}
+.st-switch.on{background:var(--accent)}
+.st-switch.on span{transform:translateX(22px)}
+.st-switch:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.st-head{display:flex;align-items:center;gap:.5rem;margin:1.2rem 0 .1rem}
+.st-head svg{width:20px;height:20px;color:var(--accent)}
+.st-intro{margin:.1rem 0 .5rem}
+.st-list{padding:.2rem .9rem}
+.st-game{border-bottom:1px solid var(--line)}
+.st-game:last-child{border-bottom:0}
+.st-game summary{display:flex;align-items:center;gap:.7rem;padding:.6rem 0;cursor:pointer;list-style:none;min-height:48px}
+.st-game summary::-webkit-details-marker{display:none}
+.st-val{flex:none;min-width:28px;padding:.15rem .5rem;border-radius:12px;background:color-mix(in srgb,var(--accent) 12%,#fff);color:var(--accent);font-family:var(--f-ui);font-size:.75rem;font-weight:600;text-align:center}
+.st-chev{flex:none;width:9px;height:9px;border-right:2px solid var(--ink-50);border-bottom:2px solid var(--ink-50);transform:rotate(45deg);transition:transform .15s;margin:0 .3rem 0 .1rem}
+.st-game[open] .st-chev{transform:rotate(-135deg)}
+.st-game summary:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.st-body{padding:0 0 .8rem 3.1rem}
+.st-body .sq-inline{margin-top:.3rem}
+.st-body .sq-btn{margin-top:.5rem}
+.st-select span{font-size:.78rem;color:var(--ink)}
 `
