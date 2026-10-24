@@ -8,7 +8,6 @@
 // `?moved=1` (see the portfolio's next.config.js), and gets a one-time note that this is the new home and
 // the old icon can go. The marker is taken off the address straight away, so a reload does not repeat it.
 import { useEffect, useState } from 'react'
-import { ALL_GAME_IDS } from './gameDefs'
 
 type InstallPromptEvent = Event & {
   prompt: () => Promise<void>
@@ -16,11 +15,6 @@ type InstallPromptEvent = Event & {
 }
 
 const DISMISS_KEY = 'pr-install-dismissed'
-const ROUTES_KEY = 'ls-pages-saved'
-const ROUTES_EVERY_MS = 7 * 24 * 3600 * 1000
-/** Every page of the app, for the worker to keep (see public/sw.js, which accepts only these shapes). */
-const APP_PAGES = ['/', '/stickers', '/about', '/copyright', '/parents', '/parents/child', '/parents/progress', '/parents/settings', '/parents/voice', '/parents/pictures', '/parents/family', '/parents/share', '/parents/feedback',
-  '/parents/privacy', ...ALL_GAME_IDS.map(id => `/games/${id}`)]
 
 function isStandalone() {
   return (
@@ -58,17 +52,11 @@ export default function PwaInstall() {
         .register('/sw.js', { scope: '/' })
         .then(() => navigator.serviceWorker.ready)
         .then(reg => {
-          // The worker only starts after this page has loaded, so it never saw the page or its scripts go by. Hand
-          // it the list now, so one visit is enough to work offline. It also gets every other page of the app, so
-          // the games not opened yet work offline too; that is repeated about once a week to keep them fresh.
+          // The worker saves every page of the app by itself when it installs. This hands it what this page loaded
+          // (the fonts, mostly, which only show up once the page runs), and on every load it also makes the worker
+          // check that nothing is missing and save what is.
           const send = () => {
             const urls = [location.href, ...performance.getEntriesByType('resource').map(r => r.name)]
-            let due = true
-            try { due = Date.now() - Number(localStorage.getItem(ROUTES_KEY) || 0) > ROUTES_EVERY_MS } catch {}
-            if (due) {
-              urls.push(...APP_PAGES)
-              try { localStorage.setItem(ROUTES_KEY, String(Date.now())) } catch {}
-            }
             reg.active?.postMessage({ type: 'precache', urls })
           }
           if (document.readyState === 'complete') send()

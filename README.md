@@ -141,13 +141,15 @@ file that `scripts/test-thinking.mts` runs thousands of rounds of.
   back to the game they were in.
 - **Works offline.** Everything runs on the device, and a small service worker (`public/sw.js`,
   scoped to the whole site, answering only the app's own pages and never the API) keeps every page, its scripts, the icons and the fonts. One visit is enough:
-  the page hands the worker the list of pages and its own files once it has loaded (`PwaInstall.tsx`; the pages
-  again about once a week), because on a first visit the worker starts too late to see them. The worker saves each
-  page and reads the scripts out of it. Pages are network first, so a visit with a connection is always current.
-  The installed app's launch address (`?src=pwa`) is the same saved page. `scripts/test-offline.mts` checks all of
-  this against the built site. Spoken praise uses the phone's own voices, so some Android voices may stay
+  the worker saves every page and the scripts it names by itself while it installs. It finds the games from the
+  links on the front page, so a new game needs no change there. An update only takes over once everything is saved,
+  so it never leaves the app half empty, and the old copies are removed only then. Each page load also nudges the
+  worker (`PwaInstall.tsx`), which saves anything that has gone missing and keeps the fonts. Pages are network
+  first, so a visit with a connection is always current. The installed app's launch address (`?src=pwa`) is the
+  same saved page. `scripts/test-offline.mts` checks all of this against the built site: a first visit, an update,
+  an update that fails half way, and a repair. Spoken praise uses the phone's own voices, so some Android voices may stay
   quiet offline; the sparkle, buzz and chime are generated in the browser and always work. Bump `VERSION`
-  in `sw.js` to force every phone to drop its saved copy.
+  in `sw.js` to force every phone to drop its saved copy and save a fresh one.
 - **Your voice.** In the parents' area (Your voice) a parent can record up to three congratulations ("Well done! I am so proud of
   you.", the child's name if they like), up to 8 seconds each (`VoiceSettings.tsx`). At the end of a round one is
   played in place of the computer voice, chosen at random and never the same twice in a row; with none recorded

@@ -2,10 +2,13 @@
 //
 // Scoped to the whole site. It answers the app's own pages (the front screen, each game, the stickers, About and the
 // parents' pages) and the files they need from a saved copy when there is no connection; the API is never touched.
-// Pages are network first, so a visit with a connection always gets the latest. One visit is enough to be able to
-// play offline: the page hands over the list of pages, and the worker saves each one and the scripts it uses.
+// Pages are network first, so a visit with a connection always gets the latest.
+//
+// The worker fills its own cache. While it installs it saves every page and the scripts they use, and the new copy
+// replaces the old one only once that has worked, so an update never leaves the app half empty. The page also nudges
+// the worker on each load (see PwaInstall.tsx) and anything missing is saved again then.
 
-const VERSION = 'ls-v2'
+const VERSION = 'ls-v3'
 const SHELL = `ls-shell-${VERSION}`
 const ASSETS = `ls-assets-${VERSION}`
 const OFFLINE_URL = '/offline.html'
@@ -15,14 +18,24 @@ const FONT_HOSTS = ['fonts.googleapis.com', 'fonts.gstatic.com']
 
 // The addresses that are pages of this app. Anything else (a mistyped address, the API) goes straight to the network.
 const PAGE = /^\/(?:games\/[a-z]+|stickers|about|copyright|parents(?:\/[a-z]+)?)?$/
+
+// The pages that are not games. The games are found from the links on the front page, so a new game needs no change here.
+const FIXED_PAGES = ['/', '/stickers', '/about', '/copyright', '/parents', '/parents/child', '/parents/progress', '/parents/settings',
+  '/parents/voice', '/parents/pictures', '/parents/family', '/parents/share', '/parents/feedback', '/parents/privacy']
+const MAX_URLS = 120
 const isPage = (pathname) => PAGE.test(pathname.replace(/\/+$/, '') || '/')
 
 // A page is saved under its path alone, so /?src=pwa and / are the same copy.
 const pageKey = (url) => new Request(url.origin + (url.pathname.replace(/\/+$/, '') || '/'))
 
+// A new worker only takes over once every page and file is saved. If the network fails half way, the install fails, the
+// old worker and its copies stay in charge, and the browser tries again later.
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(SHELL).then((cache) => cache.addAll(PRECACHE)).then(() => self.skipWaiting())
+    caches.open(SHELL)
+      .then((cache) => cache.addAll(PRECACHE))
+      .then(() => savePages(true))
+      .then(() => self.skipWaiting())
   )
 })
 
@@ -78,47 +91,113 @@ function assetsIn(html) {
   return [...found]
 }
 
-async function saveAsset(assets, href, font) {
+// Saves one file. The check looks in this version's cache only, because the old caches are deleted on activate.
+async function saveAsset(assets, href, font, strict) {
   try {
-    if (await caches.match(href)) return
+    if (await assets.match(href)) return
     const res = await fetch(href, font ? { mode: 'no-cors' } : undefined)
     if (res.ok || res.type === 'opaque') await assets.put(href, res)
-  } catch {}
+    else if (strict) throw new Error(`${href}: ${res.status}`)
+  } catch (err) {
+    if (strict) throw err
+  }
 }
 
-async function savePage(shell, assets, url) {
-  const res = await fetch(url.href)
-  if (!res.ok) return
+// Saves a page and the scripts it names. Returns the page's text so its links can be followed.
+async function savePage(shell, assets, url, strict) {
+  const res = await fetch(url.href, { cache: 'reload' })
+  if (!res.ok) {
+    if (strict) throw new Error(`${url.pathname}: ${res.status}`)
+    return ''
+  }
   const html = await res.clone().text()
-  await shell.put(pageKey(url), res)
-  for (const a of assetsIn(html)) await saveAsset(assets, new URL(a, self.location.origin).href, false)
+  for (const a of assetsIn(html)) await saveAsset(assets, new URL(a, self.location.origin).href, false, strict)
+  await shell.put(pageKey(url), res)   // last, so a saved page always has its scripts
+  return html
 }
 
-// The page tells the worker what to keep (see PwaInstall.tsx), because on a first visit the worker starts too late to
-// see those requests go by. Only this app's pages, its static files, the icons and the fonts are accepted; anything
+// The game pages linked from the front page.
+const GAME_LINK = /href="(\/games\/[a-z]+)"/g
+const gamesIn = (html) => [...new Set([...html.matchAll(GAME_LINK)].map((m) => m[1]))]
+
+// Runs the jobs three at a time. With strict set, the first failure is thrown once the others have finished.
+async function inParallel(jobs, strict) {
+  let failure
+  const lane = async () => {
+    for (let job; (job = jobs.shift()); ) {
+      try { await job() } catch (err) { if (strict && !failure) failure = err }
+    }
+  }
+  await Promise.all([lane(), lane(), lane()])
+  if (failure) throw failure
+}
+
+// Saves every page of the app that is not saved yet. With strict set (while installing), any failure is thrown.
+// Otherwise this is a quiet repair, and a page that fails is tried again the next time.
+async function savePages(strict) {
+  const shell = await caches.open(SHELL)
+  const assets = await caches.open(ASSETS)
+  for (const file of PRECACHE) {
+    if (!(await shell.match(file))) { try { await shell.add(file) } catch { if (strict) throw new Error(`${file} not saved`) } }
+  }
+  const missing = async (path) => !(await shell.match(pageKey(new URL(path, self.location.origin))))
+  const save = async (path) => savePage(shell, assets, new URL(path, self.location.origin), strict)
+
+  // The front page first, because it names the games.
+  const home = await shell.match(pageKey(new URL('/', self.location.origin)))
+  let homeHtml = home ? await home.text() : ''
+  if (!homeHtml) homeHtml = await save('/')
+  const paths = [...FIXED_PAGES.filter((p) => p !== '/'), ...gamesIn(homeHtml)].slice(0, MAX_URLS)
+  const jobs = []
+  for (const path of paths) {
+    if (await missing(path)) jobs.push(() => save(path))
+  }
+  await inParallel(jobs, strict)
+
+  // Pages that were saved before may name scripts that are gone (for example after a cleanup), so fill those in too.
+  // That reads every saved page, so it is not done on every load.
+  if (!strict && Date.now() - lastAssetCheck > ASSET_CHECK_EVERY_MS) {
+    lastAssetCheck = Date.now()
+    await repairAssets(shell, assets)
+  }
+}
+let lastAssetCheck = 0
+const ASSET_CHECK_EVERY_MS = 5 * 60 * 1000
+
+async function repairAssets(shell, assets) {
+  const jobs = []
+  for (const req of await shell.keys()) {
+    const res = await shell.match(req)
+    if (!res || !(res.headers.get('content-type') || '').includes('html')) continue
+    for (const a of assetsIn(await res.text())) jobs.push(() => saveAsset(assets, new URL(a, self.location.origin).href, false, false))
+  }
+  await inParallel(jobs, false)
+}
+
+// The page also hands over what it loaded itself (see PwaInstall.tsx): the fonts in particular, which are only known
+// once the page is running. Only this app's pages, its static files, the icons and the fonts are accepted; anything
 // else in the list is ignored.
 async function precacheUrls(urls) {
   const shell = await caches.open(SHELL)
   const assets = await caches.open(ASSETS)
-  let pending = urls.slice(0, 120)
-  const worker = async () => {
-    for (let u; (u = pending.shift()); ) {
-      try {
-        const url = new URL(u, self.location.origin)
-        const own = url.origin === self.location.origin
-        if (own && isPage(url.pathname)) await savePage(shell, assets, url)
-        else if (FONT_HOSTS.includes(url.hostname)) await saveAsset(assets, url.href, true)
-        else if (own && (url.pathname.startsWith('/_next/static/') || url.pathname.startsWith('/icon'))) await saveAsset(assets, url.href, false)
-      } catch {}
-    }
-  }
-  await Promise.all([worker(), worker(), worker()])
+  const pending = urls.slice(0, MAX_URLS)
+  const jobs = pending.map((u) => async () => {
+    const url = new URL(u, self.location.origin)
+    const own = url.origin === self.location.origin
+    if (own && isPage(url.pathname)) { if (!(await shell.match(pageKey(url)))) await savePage(shell, assets, url, false) }
+    else if (FONT_HOSTS.includes(url.hostname)) await saveAsset(assets, url.href, true, false)
+    else if (own && (url.pathname.startsWith('/_next/static/') || url.pathname.startsWith('/icon'))) await saveAsset(assets, url.href, false, false)
+  })
+  await inParallel(jobs, false)
 }
 
 self.addEventListener('message', (event) => {
   const data = event.data
   if (!data || data.type !== 'precache' || !Array.isArray(data.urls)) return
-  event.waitUntil(precacheUrls(data.urls.filter((u) => typeof u === 'string')))
+  event.waitUntil((async () => {
+    await precacheUrls(data.urls.filter((u) => typeof u === 'string'))
+    try { await savePages(false) } catch {}
+  })())
 })
 
 self.addEventListener('fetch', (event) => {
